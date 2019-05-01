@@ -79,17 +79,14 @@
         var cf = currentFrame();
         if (cf >= 0) {
             console.log(`Hello the frame is: ${cf}`);
-            DataFrame.fromCSV("data/blink_v2.csv").then(df => {
-                df.sql.register('tmp', true);
-                var result = DataFrame.sql.request(`SELECT pupil_x, pupil_y FROM tmp WHERE frame_num < ${cf+1} AND frame_num >= ${cf}`);
-                result.show();
-                var result_array = result.toArray();
-                var left_pupil_x = result_array[0][0];
-                var left_pupil_y = result_array[0][1];
-                console.log(left_pupil_x);
-                console.log(left_pupil_y);
-
-            })
+            //eye_data.show();
+            var result = DataFrame.sql.request(`SELECT pupil_x, pupil_y FROM tmp WHERE frame_num < ${cf+1} AND frame_num >= ${cf}`);
+            result.show();
+            var result_array = result.toArray();
+            var left_pupil_x = result_array[0][0];
+            var left_pupil_y = result_array[0][1];
+            console.log(left_pupil_x);
+            console.log(left_pupil_y);
         }
     };
 
@@ -116,6 +113,9 @@
     vid.onloadeddata = function () {
         jump(0);
         updateCurrentState();
+        DataFrame.fromCSV("data/blink_v2.csv").then(df => {
+            var ret = DataFrame.sql.registerTable(df, 'tmp', true);
+        })
     }
 	// end vidstep video player //
 
