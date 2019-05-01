@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Drag/Drop/Bounce</title>
+  <link rel="stylesheet" href="omnizoom/dist/omnizoom.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <center><h2> Video annotation </h2></center>
+  <br>
+
+  <div id="outerContainer">
+  	<center><video id="video" width=100% height=100%></video></center>
+    <input type="file" accept="video/*" id="vid-input" style="display: none"/>
+  </div>
+  <br>
+  <h3>
+  <div id='frame-id-div' class="col-4">
+      <span class="info-label">Frame:</span>
+      <span id="frame-id">0</span>
+      <span class="info-max">(max: </span>
+      <span id="frame-id-max">0</span><span class="info-max">)</span>
+  </div>
+  <div id="frame-ts-div" class="col-4">
+      <span class="info-label">Secs:</span>
+      <span id="frame-ts">0</span>
+      <span class="info-max">(max: </span>
+      <span id="frame-ts-max">0</span><span class="info-max">)</span>
+  </div>
+  <div id="cmd-status-div" class="col-4">Command: <span id="cmd-status"> </span></div>
+  </h3>
+  <br>
+  <br>
+  <br>
+  <script src="video_player.js"></script>
+  <script src="omnizoom/dist/omnizoom.min.js"></script>
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <script type="text/javascript" src="js/mousetrap.min.js"></script>
+  <script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
+  <script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
+
+  <script type="text/javascript">
+	// page elements
+	var vid = document.getElementById('video');
+    var createObjectURL = (window.URL || window.webkitURL).createObjectURL;
+	var divFrameId = document.querySelector('#frame-id');
+	var divFrameTs = document.querySelector('#frame-ts');
+	var divCmdStatus = document.querySelector('#cmd-status');
+	var vidInput = document.querySelector('#vid-input');
+
+	var fps = 30;
+	var smallDelta = 0.001;
+	var playbackSpeed = 1;
+
+    var DataFrame = dfjs.DataFrame;
+
+	Mousetrap.bind('space', function (e) {
+		e.preventDefault();togglePlay();
+	});
+	Mousetrap.bind('left', function (e) {
+		takeStep(-1);
+
+	}, 'keydown');
+	Mousetrap.bind('right', function (e) {
+		takeStep(1);
+
+	}, 'keydown');
+	Mousetrap.bind('r', function (e) {
+		e.preventDefault();jump(0);
+	});
+
+	vid.ontimeupdate = function () {
+	    //updateCurrentState();
+        var cf = currentFrame();
+        if (cf >= 0) {
+            console.log(`Hello the frame is: ${cf}`);
+            DataFrame.fromCSV("data/blink_v2.csv").then(df => {
+                df.sql.register('tmp', true);
+                var result = DataFrame.sql.request(`SELECT pupil_x, pupil_y FROM tmp WHERE frame_num < ${cf+1} AND frame_num >= ${cf}`);
+                result.show();
+                var result_array = result.toArray();
+                var left_pupil_x = result_array[0][0];
+                var left_pupil_y = result_array[0][1];
+                console.log(left_pupil_x);
+                console.log(left_pupil_y);
+
+            })
+        }
+    };
+
+    $(vid).dblclick(function (e) {
+        e.preventDefault();
+        $(vidInput).trigger('click');
+    });
+
+    var playSelectedFile = function (event) {
+        var file = this.files[0];
+        var type = file.type;
+        var canPlay = vid.canPlayType(type);
+        if (canPlay === '') canPlay = 'no';
+        console.assert(canPlay);
+
+        var fileURL = createObjectURL(file);
+        vid.src = fileURL;
+    };
+
+    vidInput.addEventListener('change', playSelectedFile, false);
+    playVidServer('https://vidstep.com/data/count.mp4');
+
+    // order of events once data is loaded
+    vid.onloadeddata = function () {
+        jump(0);
+        updateCurrentState();
+    }
+	// end vidstep video player //
+
+  </script>
+
+</body>
+</html>

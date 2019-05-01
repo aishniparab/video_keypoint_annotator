@@ -1,0 +1,87 @@
+#outerContainer {
+  border: 5px solid #006dcc;
+  width: 50%;
+  height: 100%;
+  align-items: center;
+  margin: auto;
+  justify-content: center;
+}
+#container {
+  width: 50%;
+  height: 100%;
+  background-color: #fff;
+  border: 1px solid #b222;
+  display: flex;
+  margin: auto;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: none;
+  position: relative;
+  /*background-image:url("images/IMG-0840.jpg");*/
+  background-size: cover;
+}
+#inner {
+  width: 50px;
+  height: 50px;
+  background-color: rgb(245, 230, 99);
+  border-radius: 50%;
+  touch-action: none;
+  user-select: none;
+  position: absolute;
+  z-index: 100;
+}
+#inner:active {
+  background-color: rgba(168, 218, 220, 1.00);
+}
+#inner:hover {
+  cursor: pointer;
+}
+#outer {
+  width: 50px;
+  height: 50px;
+  background-color: rgb(230, 99, 245);
+  border-radius: 50%;
+  touch-action: none;
+  user-select: none;
+  position: absolute;
+  z-index: 100;
+}
+#outer:active {
+  background-color: rgba(168, 218, 220, 1.00);
+}
+#outer:hover {
+  cursor: pointer;
+}
+#pupil {
+  width: 50px;
+  height: 50px;
+  background-color: rgb(99, 245, 230);
+  border-radius: 50%;
+  touch-action: none;
+  user-select: none;
+  position: absolute;
+  z-index: 100;
+}
+#pupil:active {
+  background-color: rgba(168, 218, 220, 1.00);
+}
+#pupil:hover {
+  cursor: pointer;
+}
+#omnizoom-image{
+  position: relative;
+  cursor: move;
+  width: 100%;
+  height: 100%;
+}
+.over {
+    z-index: 1;
+    grid-row-start: top;
+    grid-row-end: bot;
+    grid-column-start: left;
+    grid-column-end: right;
+}
+#upload {
+  display:none;
+}
