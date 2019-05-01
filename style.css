@@ -1,29 +1,16 @@
 #outerContainer {
+  width: 1920px;
+  /*height: 100%;*/
   border: 5px solid #006dcc;
-  width: 50%;
-  height: 100%;
-  align-items: center;
-  margin: auto;
-  justify-content: center;
-}
-#container {
-  width: 50%;
-  height: 100%;
-  background-color: #fff;
-  border: 1px solid #b222;
   display: flex;
   margin: auto;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  touch-action: none;
+  /*align-items: center;*/
+  /*justify-content: center;*/
   position: relative;
-  /*background-image:url("images/IMG-0840.jpg");*/
-  background-size: cover;
 }
-#inner {
-  width: 50px;
-  height: 50px;
+#left_inner {
+  width: 5px;
+  height: 5px;
   background-color: rgb(245, 230, 99);
   border-radius: 50%;
   touch-action: none;
@@ -31,15 +18,31 @@
   position: absolute;
   z-index: 100;
 }
-#inner:active {
+#left_inner:active {
   background-color: rgba(168, 218, 220, 1.00);
 }
-#inner:hover {
+#left_inner:hover {
   cursor: pointer;
 }
-#outer {
-  width: 50px;
-  height: 50px;
+#right_inner {
+  width: 5px;
+  height: 5px;
+  background-color: rgb(245, 230, 99);
+  border-radius: 50%;
+  touch-action: none;
+  user-select: none;
+  position: absolute;
+  z-index: 100;
+}
+#right_inner:active {
+  background-color: rgba(168, 218, 220, 1.00);
+}
+#right_inner:hover {
+  cursor: pointer;
+}
+#left_outer {
+  width: 5px;
+  height: 5px;
   background-color: rgb(230, 99, 245);
   border-radius: 50%;
   touch-action: none;
@@ -47,15 +50,31 @@
   position: absolute;
   z-index: 100;
 }
-#outer:active {
+#left_outer:active {
   background-color: rgba(168, 218, 220, 1.00);
 }
-#outer:hover {
+#left_outer:hover {
   cursor: pointer;
 }
-#pupil {
-  width: 50px;
-  height: 50px;
+#right_outer {
+  width: 5px;
+  height: 5px;
+  background-color: rgb(230, 99, 245);
+  border-radius: 50%;
+  touch-action: none;
+  user-select: none;
+  position: absolute;
+  z-index: 100;
+}
+#right_outer:active {
+  background-color: rgba(168, 218, 220, 1.00);
+}
+#right_outer:hover {
+  cursor: pointer;
+}
+#left_pupil {
+  width: 5px;
+  height: 5px;
   background-color: rgb(99, 245, 230);
   border-radius: 50%;
   touch-action: none;
@@ -63,10 +82,26 @@
   position: absolute;
   z-index: 100;
 }
-#pupil:active {
+#left_pupil:active {
   background-color: rgba(168, 218, 220, 1.00);
 }
-#pupil:hover {
+#left_pupil:hover {
+  cursor: pointer;
+}
+#right_pupil {
+  width: 5px;
+  height: 5px;
+  background-color: rgb(23, 250, 198);
+  border-radius: 50%;
+  touch-action: none;
+  user-select: none;
+  position: absolute;
+  z-index: 100;
+}
+#right_pupil:active {
+  background-color: rgba(168, 218, 220, 1.00);
+}
+#right_pupil:hover {
   cursor: pointer;
 }
 #omnizoom-image{
