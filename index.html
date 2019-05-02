@@ -40,11 +40,13 @@
       <span id="frame-ts-max">0</span><span class="info-max">)</span>
   </div>
   <div id="cmd-status-div" class="col-4">Command: <span id="cmd-status"> </span></div>
+  <button>Reset Frame Position</button>
   </h3>
   <br>
   <br>
   <br>
   <script src="video_player.js"></script>
+  <script src="frame_drag.js"></script>
   <script src="omnizoom/dist/omnizoom.min.js"></script>
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -70,14 +72,15 @@
     const right_inner_kp = document.querySelector('#right_inner');
     const left_outer_kp = document.querySelector('#left_outer');
     const right_outer_kp = document.querySelector('#right_outer');
-    //const aspect_ratio = parseFloat(1920)/parseFloat(1080);
 
+    //const aspect_ratio = parseFloat(1920)/parseFloat(1080);
     var fps = 30;
 	var smallDelta = 0.001;
 	var playbackSpeed = 1;
 
     var DataFrame = dfjs.DataFrame;
 
+    // set key bindings
 	Mousetrap.bind('space', function (e) {
 		e.preventDefault();togglePlay();
 	});
@@ -92,17 +95,6 @@
 	Mousetrap.bind('r', function (e) {
 		e.preventDefault();jump(0);
 	});
-	//editing this function to reset drag
-	Mousetrap.bind('u', function (e) {
-	  e.preventDefault();
-	  var frame_img = $('video')
-              .children()
-              .detach()
-              .css('position', 'relative');
-	  $('zoom-container').append(frame_img);
-
-    });
-	//
 
 	vid.ontimeupdate = function () {
 	    //updateCurrentState();
@@ -139,24 +131,14 @@
         }
     };
 
+	// input vid on double click
     $(vid).dblclick(function (e) {
         e.preventDefault();
         $(vidInput).trigger('click');
     });
 
-    var playSelectedFile = function (event) {
-        var file = this.files[0];
-        var type = file.type;
-        var canPlay = vid.canPlayType(type);
-        if (canPlay === '') canPlay = 'no';
-        console.assert(canPlay);
-
-        var fileURL = createObjectURL(file);
-        vid.src = fileURL;
-    };
-
     vidInput.addEventListener('change', playSelectedFile, false);
-    playVidServer('https://vidstep.com/data/count.mp4');
+    playVidServer('https://vidstep.com/data/count.mp4'); // default vid
 
     // order of events once data is loaded
     vid.onloadeddata = function () {
@@ -183,9 +165,15 @@
       $("#right_outer").draggable({
         containment: "parent"
       });
+      $("button").click(function() {
+        const vid_elem = document.querySelector("#video");
+        vid_elem.style.left = 0;
+        vid_elem.style.top = 0;
+      });
     }
 	// end vidstep video player //
 
+    // start vid frame pan/zoom //
     document.getElementById('video').addEventListener('mousedown', start_drag);
     document.getElementById('outerContainer').addEventListener('mousemove', while_drag);
     document.getElementById('outerContainer').addEventListener('mouseup', stop_drag);
@@ -194,32 +182,7 @@
     zmy1.addElem(vid)
             .addZoom()
             .addPan();
-    var img_ele = null,
-            x_cursor = 0,
-            y_cursor = 0,
-            x_img_ele = 0,
-            y_img_ele = 0;
-
-    function start_drag() {
-      img_ele = this;
-      x_img_ele = window.event.clientX - vid.offsetLeft;
-      y_img_ele = window.event.clientY - vid.offsetTop;
-    }
-
-    function stop_drag(){
-      img_ele = null;
-    }
-
-    function while_drag(){
-      var x_cursor = window.event.clientX;
-      var y_cursor = window.event.clientY;
-      if (img_ele !== null){
-        img_ele.style.left = (x_cursor - x_img_ele) + 'px';
-        img_ele.style.top = ( window.event.clientY - y_img_ele) + 'px';
-        console.log(img_ele.style.left+' - '+img_ele.style.top);
-      }
-    }
-
+    // end vid frame pan/zoom //
   </script>
 
 </body>

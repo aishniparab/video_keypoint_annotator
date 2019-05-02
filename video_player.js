@@ -1,4 +1,15 @@
 // all functions used by the video_player
+var playSelectedFile = function (event) {
+    var file = this.files[0];
+    var type = file.type;
+    var canPlay = vid.canPlayType(type);
+    if (canPlay === '') canPlay = 'no';
+    console.assert(canPlay);
+
+    var fileURL = createObjectURL(file);
+    vid.src = fileURL;
+};
+
 function playVidServer(path) {
     vid.src = path;
 }
@@ -74,3 +85,4 @@ function togglePlay() {
 function displayAnnotations() {
     // do nothing yet
 }
+
