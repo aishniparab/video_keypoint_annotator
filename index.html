@@ -151,9 +151,24 @@
         DataFrame.fromCSV("data/blink_v2.csv").then(df => {
             var ret = DataFrame.sql.registerTable(df, 'tmp', true);
         });
-        $("#left_pupil").draggable({
+      $("#left_inner").draggable({
+        containment: "parent"
+      });
+      $("#left_pupil").draggable({
             containment: "parent"
         });
+      $("#left_outer").draggable({
+        containment: "parent"
+      });
+      $("#right_inner").draggable({
+        containment: "parent"
+      });
+      $("#right_pupil").draggable({
+        containment: "parent"
+      });
+      $("#right_outer").draggable({
+        containment: "parent"
+      });
     }
 	// end vidstep video player //
 
