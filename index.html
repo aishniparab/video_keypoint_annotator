@@ -26,32 +26,35 @@
     <div id="right_outer"></div>
   </div>
   <br>
-  <h3>
-  <div id='frame-id-div' class="col-4">
+
+  <div id='frame-id-div' class="col-4" style="font-size:20px;">
       <span class="info-label">Frame:</span>
       <span id="frame-id">0</span>
       <span class="info-max">(max: </span>
       <span id="frame-id-max">0</span><span class="info-max">)</span>
   </div>
-  <div id="frame-ts-div" class="col-4">
+  <div id="frame-ts-div" class="col-4" style="font-size:20px;">
       <span class="info-label">Secs:</span>
       <span id="frame-ts">0</span>
       <span class="info-max">(max: </span>
       <span id="frame-ts-max">0</span><span class="info-max">)</span>
   </div>
-  <div id="cmd-status-div" class="col-4">Command: <span id="cmd-status"> </span></div>
+  <div id="cmd-status-div" class="col-4" style="font-size:20px;">Command: <span id="cmd-status"> </span></div>
   <button>Reset Frame Position</button>
-  </h3>
+  <div id="results"></div>
+
   <br>
   <br>
   <br>
-  <script src="video_player.js"></script>
-  <script src="frame_drag.js"></script>
+  <script src="src/video_player.js"></script>
+  <script src="src/frame_drag.js"></script>
+  <script src="src/keypoints.js"></script>
+
   <script src="omnizoom/dist/omnizoom.min.js"></script>
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-  <script type="text/javascript" src="js/mousetrap.min.js"></script>
+  <script type="text/javascript" src="src/mousetrap.min.js"></script>
   <script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
   <script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
 
@@ -86,11 +89,9 @@
 	});
 	Mousetrap.bind('left', function (e) {
 		takeStep(-1);
-
 	}, 'keydown');
 	Mousetrap.bind('right', function (e) {
 		takeStep(1);
-
 	}, 'keydown');
 	Mousetrap.bind('r', function (e) {
 		e.preventDefault();jump(0);
@@ -148,22 +149,52 @@
             var ret = DataFrame.sql.registerTable(df, 'tmp', true);
         });
       $("#left_inner").draggable({
-        containment: "parent"
+        start: function () {
+          containment: "parent";
+        },
+        stop: function(){
+          coordinates('#left_inner');
+        }
       });
       $("#left_pupil").draggable({
-            containment: "parent"
+        start: function () {
+          containment: "parent";
+        },
+        stop: function(){
+          coordinates('#left_pupil');
+        }
         });
       $("#left_outer").draggable({
-        containment: "parent"
+        start: function () {
+          containment: "parent";
+        },
+        stop: function(){
+          coordinates('#left_outer');
+        }
       });
       $("#right_inner").draggable({
-        containment: "parent"
+        start: function () {
+          containment: "parent";
+        },
+        stop: function(){
+          coordinates('#right_inner');
+        }
       });
       $("#right_pupil").draggable({
-        containment: "parent"
+        start: function () {
+          containment: "parent";
+        },
+        stop: function(){
+          coordinates('#right_pupil');
+        }
       });
       $("#right_outer").draggable({
-        containment: "parent"
+        start: function () {
+          containment: "parent";
+        },
+        stop: function(){
+          coordinates('#right_outer');
+        }
       });
       $("button").click(function() {
         const vid_elem = document.querySelector("#video");
@@ -183,6 +214,11 @@
             .addZoom()
             .addPan();
     // end vid frame pan/zoom //
+    var img_ele = null,
+            x_cursor = 0,
+            y_cursor = 0,
+            x_img_ele = 0,
+            y_img_ele = 0;
   </script>
 
 </body>

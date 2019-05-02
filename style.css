@@ -128,3 +128,6 @@
   position: relative;
   cursor: move;
 }
+html * {
+  font-family: monospace;
+}
