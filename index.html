@@ -42,6 +42,8 @@
   <div id="cmd-status-div" class="col-4" style="font-size:20px;">Command: <span id="cmd-status"> </span></div>
   <button>Reset Frame Position</button>
   <div id="results"></div>
+  <button id="submit">Submit</button>
+  <button id="export">Export Annotations</button>
 
   <br>
   <br>
@@ -82,6 +84,9 @@
 	var playbackSpeed = 1;
 
     var DataFrame = dfjs.DataFrame;
+    // set up annotations df
+    var annotations = new DataFrame([],['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y']);
+    //annotations.show();
 
     // set key bindings
 	Mousetrap.bind('space', function (e) {
@@ -103,6 +108,7 @@
         if (cf >= 0) {
             var result = DataFrame.sql.request(`SELECT pupil_x, pupil_y, inner_x, inner_y, outer_x, outer_y FROM tmp WHERE frame_num < ${cf+1} AND frame_num >= ${cf}`);
             var result_array = result.toArray();
+
             var left_pupil_x = parseFloat(result_array[0][0])//parseFloat(aspect_ratio);
             var left_pupil_y = parseFloat(result_array[0][1]); ///parseFloat(aspect_ratio);
             var right_pupil_x = parseFloat(result_array[1][0]); ///parseFloat(aspect_ratio);
@@ -145,62 +151,80 @@
     vid.onloadeddata = function () {
         jump(0);
         updateCurrentState();
-        DataFrame.fromCSV("data/blink_v2.csv").then(df => {
+        DataFrame.fromCSV("data/scan_room_v2.csv").then(df => {
             var ret = DataFrame.sql.registerTable(df, 'tmp', true);
         });
-      $("#left_inner").draggable({
-        start: function () {
-          containment: "parent";
-        },
-        stop: function(){
-          coordinates('#left_inner');
-        }
-      });
-      $("#left_pupil").draggable({
-        start: function () {
-          containment: "parent";
-        },
-        stop: function(){
-          coordinates('#left_pupil');
-        }
+
+        $("#left_inner").draggable({
+          start: function () {
+            containment: "parent";
+          },
+          stop: function(){
+            coordinates('#left_inner');
+          }
         });
-      $("#left_outer").draggable({
-        start: function () {
-          containment: "parent";
-        },
-        stop: function(){
-          coordinates('#left_outer');
-        }
-      });
-      $("#right_inner").draggable({
-        start: function () {
-          containment: "parent";
-        },
-        stop: function(){
-          coordinates('#right_inner');
-        }
-      });
-      $("#right_pupil").draggable({
-        start: function () {
-          containment: "parent";
-        },
-        stop: function(){
-          coordinates('#right_pupil');
-        }
-      });
-      $("#right_outer").draggable({
-        start: function () {
-          containment: "parent";
-        },
-        stop: function(){
-          coordinates('#right_outer');
-        }
-      });
-      $("button").click(function() {
-        const vid_elem = document.querySelector("#video");
-        vid_elem.style.left = 0;
-        vid_elem.style.top = 0;
-      });
+        $("#left_pupil").draggable({
+          start: function () {
+            containment: "parent";
+          },
+          stop: function(){
+            coordinates('#left_pupil');
+          }
+          });
+        $("#left_outer").draggable({
+          start: function () {
+            containment: "parent";
+          },
+          stop: function(){
+            coordinates('#left_outer');
+          }
+        });
+        $("#right_inner").draggable({
+          start: function () {
+            containment: "parent";
+          },
+          stop: function(){
+            coordinates('#right_inner');
+          }
+        });
+        $("#right_pupil").draggable({
+          start: function () {
+            containment: "parent";
+          },
+          stop: function(){
+            coordinates('#right_pupil');
+          }
+        });
+        $("#right_outer").draggable({
+          start: function () {
+            containment: "parent";
+          },
+          stop: function(){
+            coordinates('#right_outer');
+          }
+        });
+        $("button").click(function() {
+          const vid_elem = document.querySelector("#video");
+          vid_elem.style.left = 0;
+          vid_elem.style.top = 0;
+        });
+        $("#submit").click(function() {
+          var r_i = get_pos('#right_inner');
+          var r_p = get_pos('#right_pupil');
+          var r_o = get_pos('#right_outer');
+          var l_i = get_pos('#left_inner');
+          var l_p = get_pos('#left_pupil');
+          var l_o = get_pos('#left_outer');
+          var f_n = currentFrame();
+          //col: ['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y']
+          var left_annot = [f_n, l_p[0], l_p[1], l_i[0], l_i[1], l_o[0], l_o[1]];
+          var right_annot = [f_n, r_p[0], r_p[1], r_i[0], r_i[1], r_o[0], r_o[1]];
+          annotations = annotations.push(left_annot, right_annot);
+          annotations.show();
+        });
+        $("#export").click(function() {
+          annotations.toCSV(true, 'data/scan_room_v2_fixed.csv');
+        })
     }
 	// end vidstep video player //
 
@@ -213,6 +237,7 @@
     zmy1.addElem(vid)
             .addZoom()
             .addPan();
+
     // end vid frame pan/zoom //
     var img_ele = null,
             x_cursor = 0,
