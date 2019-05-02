@@ -7,7 +7,11 @@
   /*align-items: center;*/
   /*justify-content: center;*/
   position: relative;
+  touch-action: relative;
+  overflow: hidden;
+  /*background-size: cover;*/
 }
+
 #left_inner {
   width: 5px;
   height: 5px;
@@ -119,4 +123,8 @@
 }
 #upload {
   display:none;
+}
+#video {
+  position: relative;
+  cursor: move;
 }

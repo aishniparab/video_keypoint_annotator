@@ -13,7 +13,9 @@
   <br>
 
   <div id="outerContainer">
-  	<center><video id="video" width=100% height=100%></video></center>
+    <div class="zoom-container" style="width: 100%; margin: 10px">
+  	<center><video ondragstart="return false" id="video" class="zoom" width=100% height=100%></video></center>
+    </div>
     <input type="file" accept="video/*" id="vid-input" style="display: none"/>
     <div id="left_inner"></div>
     <div id="left_pupil"></div>
@@ -54,6 +56,7 @@
   <script type="text/javascript">
 	// page elements
 	var vid = document.getElementById('video');
+    const container = document.getElementById("omnizoom-container");
     var createObjectURL = (window.URL || window.webkitURL).createObjectURL;
 	var divFrameId = document.querySelector('#frame-id');
 	var divFrameTs = document.querySelector('#frame-ts');
@@ -89,6 +92,17 @@
 	Mousetrap.bind('r', function (e) {
 		e.preventDefault();jump(0);
 	});
+	//editing this function to reset drag
+	Mousetrap.bind('u', function (e) {
+	  e.preventDefault();
+	  var frame_img = $('video')
+              .children()
+              .detach()
+              .css('position', 'relative');
+	  $('zoom-container').append(frame_img);
+
+    });
+	//
 
 	vid.ontimeupdate = function () {
 	    //updateCurrentState();
@@ -171,6 +185,40 @@
       });
     }
 	// end vidstep video player //
+
+    document.getElementById('video').addEventListener('mousedown', start_drag);
+    document.getElementById('outerContainer').addEventListener('mousemove', while_drag);
+    document.getElementById('outerContainer').addEventListener('mouseup', stop_drag);
+
+    const zmy1 = new omnizoom.Zoomer();
+    zmy1.addElem(vid)
+            .addZoom()
+            .addPan();
+    var img_ele = null,
+            x_cursor = 0,
+            y_cursor = 0,
+            x_img_ele = 0,
+            y_img_ele = 0;
+
+    function start_drag() {
+      img_ele = this;
+      x_img_ele = window.event.clientX - vid.offsetLeft;
+      y_img_ele = window.event.clientY - vid.offsetTop;
+    }
+
+    function stop_drag(){
+      img_ele = null;
+    }
+
+    function while_drag(){
+      var x_cursor = window.event.clientX;
+      var y_cursor = window.event.clientY;
+      if (img_ele !== null){
+        img_ele.style.left = (x_cursor - x_img_ele) + 'px';
+        img_ele.style.top = ( window.event.clientY - y_img_ele) + 'px';
+        console.log(img_ele.style.left+' - '+img_ele.style.top);
+      }
+    }
 
   </script>
 
