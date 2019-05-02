@@ -16,7 +16,8 @@
     <div class="zoom-container" style="width: 100%; margin: 10px">
   	<center><video ondragstart="return false" id="video" class="zoom" width=100% height=100%></video></center>
     </div>
-    <input type="file" accept="video/*" id="vid-input" style="display: none"/>
+    <!--<input type="file" accept="video/*" id="vid-input" style="display: none"/>-->
+
     <div id="left_inner"></div>
     <div id="left_pupil"></div>
     <div id="left_outer"></div>
@@ -26,7 +27,7 @@
     <div id="right_outer"></div>
   </div>
   <br>
-
+  <center>
   <div id='frame-id-div' class="col-4" style="font-size:20px;">
       <span class="info-label">Frame:</span>
       <span id="frame-id">0</span>
@@ -40,11 +41,12 @@
       <span id="frame-ts-max">0</span><span class="info-max">)</span>
   </div>
   <div id="cmd-status-div" class="col-4" style="font-size:20px;">Command: <span id="cmd-status"> </span></div>
-  <button>Reset Frame Position</button>
+  <!-- disabled temporarily uncomment to enable <button>Reset Frame Position</button>-->
   <div id="results"></div>
+  <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
   <button id="submit">Submit</button>
   <button id="export">Export Annotations</button>
-
+  </center>
   <br>
   <br>
   <br>
@@ -223,11 +225,14 @@
           annotations.show();
         });
         $("#export").click(function() {
-          annotations.toCSV(true, 'data/scan_room_v2_fixed.csv');
+          console.log("button does nothing");
+          //annotations.toCSV(true, 'data/scan_room_v2_fixed.csv');
         })
     }
 	// end vidstep video player //
 
+    //curenntly disabled feature uncomment to enable
+    /*
     // start vid frame pan/zoom //
     document.getElementById('video').addEventListener('mousedown', start_drag);
     document.getElementById('outerContainer').addEventListener('mousemove', while_drag);
@@ -244,6 +249,7 @@
             y_cursor = 0,
             x_img_ele = 0,
             y_img_ele = 0;
+     */
   </script>
 
 </body>
