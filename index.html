@@ -218,6 +218,7 @@
           var l_p = get_pos('#left_pupil');
           var l_o = get_pos('#left_outer');
           var f_n = currentFrame();
+          //check x y because get pos changed
           //col: ['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y']
           var left_annot = [f_n, l_p[0], l_p[1], l_i[0], l_i[1], l_o[0], l_o[1]];
           var right_annot = [f_n, r_p[0], r_p[1], r_i[0], r_i[1], r_o[0], r_o[1]];

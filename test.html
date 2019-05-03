@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Pupil Annotator</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div style="position: relative;">
+    <video id="video"></video>
+
+
+    <div id="left_inner"></div>
+    <div id="left_pupil"></div>
+    <div id="left_outer"></div>
+
+    <div id="right_inner"></div>
+    <div id="right_pupil"></div>
+    <div id="right_outer"></div>
+
+</div>
+
+<br>
+<input type="file" accept="video/*" id="vid-input" style="width:200px"/>
+<br>
+<br>
+<table>
+    <tr>
+
+        <td colspan="7">Model Prediction</td>
+        <td colspan="7">Display</td>
+    </tr>
+    <tr>
+        <td>Frame Info</td>
+        <td>&nbsp;</td>
+        <td>Left</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>Right</td>
+        <td>&nbsp;</td>
+
+        <td>Frame Info</td>
+        <td>&nbsp;</td>
+        <td>Left</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>Right</td>
+        <td>&nbsp;</td>
+
+    </tr>
+    <tr>
+        <td>#</td>
+        <td>Inner</td>
+        <td>Pupil</td>
+        <td>Outer</td>
+        <td>Inner</td>
+        <td>Pupil</td>
+        <td>Outer</td>
+        <td>#</td>
+        <td>Inner</td>
+        <td>Pupil</td>
+        <td>Outer</td>
+        <td>Inner</td>
+        <td>Pupil</td>
+        <td>Outer</td>
+    </tr>
+    <tr>
+        <td id="frame_num_csv">0</td>
+        <td id="csv_li">0, 0</td>
+        <td id="csv_lp">0, 0</td>
+        <td id="csv_lo">0, 0</td>
+        <td id="csv_ri">0, 0</td>
+        <td id="csv_rp">0, 0</td>
+        <td id="csv_ro">0, 0</td>
+        <td id="frame_num_disp">0</td>
+        <td id="disp_li">0, 0</td>
+        <td id="disp_lp">0, 0</td>
+        <td id="disp_lo">0, 0</td>
+        <td id="disp_ri">0, 0</td>
+        <td id="disp_rp">0, 0</td>
+        <td id="disp_ro">0, 0</td>
+    </tr>
+</table>
+
+
+<br>
+<div id='frame-id-div' class="col-4" style="font-size:18px;">
+    <span class="info-label">Frame:</span>
+    <span id="frame-id">0</span>
+    <span class="info-max">(max: </span>
+    <span id="frame-id-max">0</span><span class="info-max">)</span>
+</div>
+<div id="frame-ts-div" class="col-4" style="font-size:18px;">
+    <span class="info-label">Secs:</span>
+    <span id="frame-ts">0</span>
+    <span class="info-max">(max: </span>
+    <span id="frame-ts-max">0</span><span class="info-max">)</span>
+</div>
+<div id="cmd-status-div" class="col-4" style="font-size:10px; display: None;">Command: <span id="cmd-status"> </span></div>
+
+<script src="src/video_player.js"></script>
+<script src="src/frame_drag.js"></script>
+<script src="src/keypoints.js"></script>
+
+<script src="omnizoom/dist/omnizoom.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script type="text/javascript" src="src/mousetrap.min.js"></script>
+<script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
+<script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
+
+<script type="text/javascript">
+    // page elements
+    var vid = document.getElementById('video');
+    const container = document.getElementById("omnizoom-container");
+    var createObjectURL = (window.URL || window.webkitURL).createObjectURL;
+    var divFrameId = document.querySelector('#frame-id');
+    var divFrameTs = document.querySelector('#frame-ts');
+    var divCmdStatus = document.querySelector('#cmd-status');
+    var vidInput = document.querySelector('#vid-input');
+
+    // test elements
+    var frame_num_csv = document.querySelector('#frame_num_csv');
+    var csv_li = document.querySelector('#csv_li');
+    var csv_lp = document.querySelector('#csv_lp');
+    var csv_lo = document.querySelector('#csv_lo');
+    var csv_ri = document.querySelector('#csv_ri');
+    var csv_rp = document.querySelector('#csv_rp');
+    var csv_ro = document.querySelector('#csv_ro');
+    var frame_num_disp = document.querySelector('#frame_num_disp');
+    var disp_li = document.querySelector('#disp_li');
+    var disp_lp = document.querySelector('#disp_lp');
+    var disp_lo = document.querySelector('#disp_lo');
+    var disp_ri = document.querySelector('#disp_ri');
+    var disp_rp = document.querySelector('#disp_rp');
+    var disp_ro = document.querySelector('#disp_ro');
+
+    // initialize keypoint variables
+    const left_pupil_kp = document.querySelector('#left_pupil');
+    const right_pupil_kp = document.querySelector('#right_pupil');
+    const left_inner_kp = document.querySelector('#left_inner');
+    const right_inner_kp = document.querySelector('#right_inner');
+    const left_outer_kp = document.querySelector('#left_outer');
+    const right_outer_kp = document.querySelector('#right_outer');
+
+    //const aspect_ratio = parseFloat(1920)/parseFloat(1080);
+    var fps = 30;
+    var smallDelta = 0.001;
+    var playbackSpeed = 1;
+
+    var DataFrame = dfjs.DataFrame;
+    // set up annotations df
+    var annotations = new DataFrame([],['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y']);
+    //annotations.show();
+
+    // set key bindings
+    Mousetrap.bind('space', function (e) {
+        e.preventDefault();togglePlay();
+    });
+    Mousetrap.bind('left', function (e) {
+        takeStep(-1);
+    }, 'keydown');
+    Mousetrap.bind('right', function (e) {
+        takeStep(1);
+    }, 'keydown');
+    Mousetrap.bind('r', function (e) {
+        e.preventDefault();jump(0);
+    });
+
+    vid.ontimeupdate = function () {
+        //updateCurrentState();
+        var cf = currentFrame();
+        if (cf >= 0) {
+            var result = DataFrame.sql.request(`SELECT frame_num, pupil_x, pupil_y, inner_x, inner_y, outer_x, outer_y FROM tmp WHERE frame_num < ${cf+1} AND frame_num >= ${cf}`);
+            var result_array = result.toArray();
+            result.show();
+            var left_pupil_x = parseFloat(result_array[0][1])//parseFloat(aspect_ratio);
+            var left_pupil_y = parseFloat(result_array[0][2]); ///parseFloat(aspect_ratio);
+            var right_pupil_x = parseFloat(result_array[1][1]); ///parseFloat(aspect_ratio);
+            var right_pupil_y = parseFloat(result_array[1][2]); ///parseFloat(aspect_ratio);
+
+            var left_inner_x = parseFloat(result_array[0][3])//parseFloat(aspect_ratio);
+            var left_inner_y = parseFloat(result_array[0][4]); ///parseFloat(aspect_ratio);
+            var right_inner_x = parseFloat(result_array[1][3]); ///parseFloat(aspect_ratio);
+            var right_inner_y = parseFloat(result_array[1][4]); ///parseFloat(aspect_ratio);
+
+            var left_outer_x = parseFloat(result_array[0][5]);//parseFloat(aspect_ratio);
+            var left_outer_y = parseFloat(result_array[0][6]); ///parseFloat(aspect_ratio);
+            var right_outer_x = parseFloat(result_array[1][5]); ///parseFloat(aspect_ratio);
+            var right_outer_y = parseFloat(result_array[1][6]); ///parseFloat(aspect_ratio);
+            console.log(typeof(left_pupil_x));
+            left_pupil_kp.style.left = left_pupil_x-2.5 + 'px';
+            left_pupil_kp.style.top = left_pupil_y-2.5 + 'px';
+
+            right_pupil_kp.style.left = right_pupil_x-2.5 + 'px';
+            right_pupil_kp.style.top = right_pupil_y-2.5 + 'px';
+
+            left_inner_kp.style.left = left_inner_x-2.5 + 'px';
+            left_inner_kp.style.top = left_inner_y-2.5 + 'px';
+
+            right_inner_kp.style.left = right_inner_x-2.5 + 'px';
+            right_inner_kp.style.top = right_inner_y-2.5 + 'px';
+
+            left_outer_kp.style.left = left_outer_x-2.5 + 'px';
+            left_outer_kp.style.top = left_outer_y-2.5 + 'px';
+
+            right_outer_kp.style.left = right_outer_x-2.5 + 'px';
+            right_outer_kp.style.top = right_outer_y-2.5 + 'px';
+
+            // test elements
+            frame_num_csv.innerHTML = result_array[0][0];
+            csv_li.innerHTML = `${left_inner_x}, ${left_inner_y}`;
+            csv_lp.innerHTML = `${left_pupil_x}, ${left_pupil_y}`;
+            csv_lo.innerHTML = `${left_outer_x}, ${left_outer_y}`;
+            csv_ri.innerHTML = `${right_inner_x}, ${right_inner_y}`;
+            csv_rp.innerHTML = `${right_pupil_x}, ${right_pupil_y}`;
+            csv_ro.innerHTML = `${right_outer_x}, ${right_outer_y}`;
+
+            var r_i = get_pos('#right_inner');
+            var r_p = get_pos('#right_pupil');
+            var r_o = get_pos('#right_outer');
+            var l_i = get_pos('#left_inner');
+            var l_p = get_pos('#left_pupil');
+            var l_o = get_pos('#left_outer');
+
+            frame_num_disp.inner_HTML = currentFrame();
+            disp_li.innerHTML = `${l_i[0]+2.5}, ${l_i[1]+2.5}`;
+            disp_lp.innerHTML = `${l_p[0]+2.5}, ${l_p[1]+2.5}`;
+            disp_lo.innerHTML = `${l_o[0]+2.5}, ${l_o[1]+2.5}`;
+            disp_ri.innerHTML = `${r_i[0]+2.5}, ${r_i[1]+2.5}`;
+            disp_rp.innerHTML = `${r_p[0]+2.5}, ${r_p[1]+2.5}`;
+            disp_ro.innerHTML = `${r_o[0]+2.5}, ${r_o[1]+2.5}`;
+
+        }
+    };
+
+    // input vid on double click
+    $(vid).dblclick(function (e) {
+        e.preventDefault();
+        $(vidInput).trigger('click');
+    });
+
+    vidInput.addEventListener('change', playSelectedFile, false);
+    playVidServer('https://vidstep.com/data/count.mp4'); // default vid
+
+    // order of events once data is loaded
+    vid.onloadeddata = function () {
+        jump(0);
+        updateCurrentState();
+        DataFrame.fromCSV("data/scan_room_v2.csv").then(df => {
+            var ret = DataFrame.sql.registerTable(df, 'tmp', true);
+        });
+    }
+
+</script>
+
+</body>
+</html>
