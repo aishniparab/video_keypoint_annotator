@@ -10,7 +10,7 @@
 
 <body>
 <div style="position: relative;">
-    <video id="video"></video>
+    <video id="video" src="data/scan_room_v2_frame.MP4"></video>
 
 
     <div id="left_inner"></div>
@@ -227,7 +227,7 @@
             var l_p = get_pos('#left_pupil');
             var l_o = get_pos('#left_outer');
 
-            frame_num_disp.inner_HTML = currentFrame();
+            frame_num_disp.innerHTML = currentFrame();
             disp_li.innerHTML = `${l_i[0]+2.5}, ${l_i[1]+2.5}`;
             disp_lp.innerHTML = `${l_p[0]+2.5}, ${l_p[1]+2.5}`;
             disp_lo.innerHTML = `${l_o[0]+2.5}, ${l_o[1]+2.5}`;

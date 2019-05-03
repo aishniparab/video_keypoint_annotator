@@ -125,18 +125,23 @@
             var right_outer_x = parseFloat(result_array[1][4]); ///parseFloat(aspect_ratio);
             var right_outer_y = parseFloat(result_array[1][5]); ///parseFloat(aspect_ratio);
 
-            left_pupil_kp.style.left = left_pupil_x+ 'px';
-            left_pupil_kp.style.top = left_pupil_y + 'px';
-            right_pupil_kp.style.left = right_pupil_x + 'px';
-            right_pupil_kp.style.top = right_pupil_y + 'px';
-            left_inner_kp.style.left = left_inner_x + 'px';
-            left_inner_kp.style.top = left_inner_y + 'px';
-            right_inner_kp.style.left = right_inner_x + 'px';
-            right_inner_kp.style.top = right_inner_y + 'px';
-            left_outer_kp.style.left = left_outer_x + 'px';
-            left_outer_kp.style.top = left_outer_y + 'px';
-            right_outer_kp.style.left = right_outer_x + 'px';
-            right_outer_kp.style.top = right_outer_y + 'px';
+          left_pupil_kp.style.left = left_pupil_x-2.5 + 'px';
+          left_pupil_kp.style.top = left_pupil_y-2.5 + 'px';
+
+          right_pupil_kp.style.left = right_pupil_x-2.5 + 'px';
+          right_pupil_kp.style.top = right_pupil_y-2.5 + 'px';
+
+          left_inner_kp.style.left = left_inner_x-2.5 + 'px';
+          left_inner_kp.style.top = left_inner_y-2.5 + 'px';
+
+          right_inner_kp.style.left = right_inner_x-2.5 + 'px';
+          right_inner_kp.style.top = right_inner_y-2.5 + 'px';
+
+          left_outer_kp.style.left = left_outer_x-2.5 + 'px';
+          left_outer_kp.style.top = left_outer_y-2.5 + 'px';
+
+          right_outer_kp.style.left = right_outer_x-2.5 + 'px';
+          right_outer_kp.style.top = right_outer_y-2.5 + 'px';
         }
     };
 
