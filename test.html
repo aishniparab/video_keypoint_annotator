@@ -10,8 +10,7 @@
 
 <body>
 <div style="position: relative;">
-    <video id="video" src="data/scan_room_v2_frame.MP4"></video>
-
+    <video id="video"></video>
 
     <div id="left_inner"></div>
     <div id="left_pupil"></div>
@@ -24,7 +23,9 @@
 </div>
 
 <br>
-<input type="file" accept="video/*" id="vid-input" style="width:200px"/>
+Video: <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
+CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
+
 <br>
 <br>
 <table>
@@ -122,6 +123,7 @@
     var divFrameTs = document.querySelector('#frame-ts');
     var divCmdStatus = document.querySelector('#cmd-status');
     var vidInput = document.querySelector('#vid-input');
+    var csvInput = document.querySelector('#csv-input');
 
     // test elements
     var frame_num_csv = document.querySelector('#frame_num_csv');
@@ -155,20 +157,47 @@
     var DataFrame = dfjs.DataFrame;
     // set up annotations df
     var annotations = new DataFrame([],['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y']);
-    //annotations.show();
 
     // set key bindings
-    Mousetrap.bind('space', function (e) {
-        e.preventDefault();togglePlay();
-    });
-    Mousetrap.bind('left', function (e) {
+    Mousetrap.bind('c', function (e) {
         takeStep(-1);
     }, 'keydown');
-    Mousetrap.bind('right', function (e) {
+    Mousetrap.bind('v', function (e) {
         takeStep(1);
     }, 'keydown');
-    Mousetrap.bind('r', function (e) {
+    Mousetrap.bind('z', function (e) {
         e.preventDefault();jump(0);
+    });
+    Mousetrap.bind('w', function (e) {
+       //mark annotation as bad
+    });
+    Mousetrap.bind('s', function (e){
+        //create outer kp;
+        //store annot in array
+        //null otherwise
+    });
+    Mousetrap.bind('f', function (e){
+        //create inner kp new div;
+        //store annot in array
+        //null otherwise
+    });
+    Mousetrap.bind('d', function (e){
+        //create pupil kp;
+        //store annot in array
+        //null otherwise
+    });
+    Mousetrap.bind('e', function (e){
+        //mark eye state as closed
+        //store annot in array
+        //null otherwise
+    });
+    Mousetrap.bind('r', function (e){
+        //create mark eye as open kp;
+        //store annot in array
+        //null otherwise
+    });
+    Mousetrap.bind('x', function(e) {
+       //clear all ann;
     });
 
     vid.ontimeupdate = function () {
@@ -234,26 +263,16 @@
             disp_ri.innerHTML = `${r_i[0]+2.5}, ${r_i[1]+2.5}`;
             disp_rp.innerHTML = `${r_p[0]+2.5}, ${r_p[1]+2.5}`;
             disp_ro.innerHTML = `${r_o[0]+2.5}, ${r_o[1]+2.5}`;
-
         }
     };
 
-    // input vid on double click
-    $(vid).dblclick(function (e) {
-        e.preventDefault();
-        $(vidInput).trigger('click');
-    });
-
     vidInput.addEventListener('change', playSelectedFile, false);
-    playVidServer('https://vidstep.com/data/count.mp4'); // default vid
+    csvInput.addEventListener('change', load_csv, false);
 
     // order of events once data is loaded
     vid.onloadeddata = function () {
         jump(0);
         updateCurrentState();
-        DataFrame.fromCSV("data/scan_room_v2.csv").then(df => {
-            var ret = DataFrame.sql.registerTable(df, 'tmp', true);
-        });
     }
 
 </script>
