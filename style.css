@@ -20,7 +20,7 @@
   touch-action: none;
   user-select: none;
   position: absolute;
-  z-index: 100;
+  z-index: 5;
 }
 #left_inner:active {
   background-color: rgba(168, 218, 220, 1.00);
@@ -36,7 +36,7 @@
   touch-action: none;
   user-select: none;
   position: absolute;
-  z-index: 100;
+  z-index: 5;
 }
 #right_inner:active {
   background-color: rgba(168, 218, 220, 1.00);
@@ -52,7 +52,7 @@
   touch-action: none;
   user-select: none;
   position: absolute;
-  z-index: 100;
+  z-index: 5;
 }
 #left_outer:active {
   background-color: rgba(168, 218, 220, 1.00);
@@ -68,7 +68,7 @@
   touch-action: none;
   user-select: none;
   position: absolute;
-  z-index: 100;
+  z-index: 5;
 }
 #right_outer:active {
   background-color: rgba(168, 218, 220, 1.00);
@@ -84,7 +84,7 @@
   touch-action: none;
   user-select: none;
   position: absolute;
-  z-index: 100;
+  z-index: 5;
 }
 #left_pupil:active {
   background-color: rgba(168, 218, 220, 1.00);
@@ -100,7 +100,7 @@
   touch-action: none;
   user-select: none;
   position: absolute;
-  z-index: 100;
+  z-index: 5;
 }
 #right_pupil:active {
   background-color: rgba(168, 218, 220, 1.00);
@@ -108,25 +108,11 @@
 #right_pupil:hover {
   cursor: pointer;
 }
-#omnizoom-image{
-  position: relative;
-  cursor: move;
-  width: 100%;
-  height: 100%;
-}
-.over {
-    z-index: 1;
-    grid-row-start: top;
-    grid-row-end: bot;
-    grid-column-start: left;
-    grid-column-end: right;
-}
-#upload {
-  display:none;
-}
+
 #video {
   position: relative;
-  cursor: move;
+  z-index: 0;
+  /*cursor: move;*/
 }
 html * {
   font-family: monospace;
@@ -145,4 +131,11 @@ td, th {
 
 tr:nth-child(even) {
   background-color: #dddddd;
+}
+.canvas {
+  top: 0;
+  left: 0;
+  z-index: 10;
+  position: absolute;
+  cursor: crosshair;
 }

@@ -20,3 +20,11 @@ var get_pos = function(element) {
     var left = element.position().left;
     return [left, top];
 }
+
+function resize_canvas(element) {
+    var w = element.offsetWidth;
+    var h = element.offsetHeight;
+    var cv = document.getElementById("mycanvas");
+    cv.width = w;
+    cv.height = h;
+}
