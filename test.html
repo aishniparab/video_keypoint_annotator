@@ -102,6 +102,32 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     <span id="frame-ts-max">0</span><span class="info-max">)</span>
 </div>
 <div id="cmd-status-div" class="col-4" style="font-size:10px; display: None;">Command: <span id="cmd-status"> </span></div>
+<br>
+<br>
+<div id="shortcuts" style="font-size:18px;">
+    <b>Video Player Keyboard Shortcuts</b>
+<div><span>v:</span>next frame</div>
+<div><span>c:</span>previous frame</div>
+<div><span>z:</span>restart video</div>
+<div><span>x:</span>clear all annotations</div>
+<div><span>w:</span>flag image as invalid</div>
+<div><span>e:</span>eye closed</div>
+<div><span>r:</span>eye open</div>
+<div><span>s:</span>outer corner</div>
+<div><span>d:</span>pupil</div>
+<div><span>f:</span>inner corner</div>
+</div>
+<br>
+<br>
+<div class="instructions" style="font-size:18px;">
+    <b>Instructions:</b>
+    <ol>
+        <li>Upload .mp4 video file and corresponding .csv file</li>
+        <li>Go through each frame carefully</li>
+        <li>If a key point is incorrect, press the relevant keyboard shortcut and draw the correct one</li>
+    </ol>
+</div>
+
 
 <script src="src/video_player.js"></script>
 <script src="src/frame_drag.js"></script>
@@ -160,6 +186,14 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     var DataFrame = dfjs.DataFrame;
     // set up annotations df
     var annotations = new DataFrame([],['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y']);
+    var kp_selection = null;
+    var click_count = 0;
+    var kp_inner_selection_count = null;
+    var kp_outer_selection_count = null;
+    var kp_pupil_selection_count = null;
+    var kp_prev_inner_pos = null;
+    var kp_prev_outer_pos = null;
+    var kp_prev_pupil_pos = null;
 
     // set key bindings
     Mousetrap.bind('c', function (e) {
@@ -178,17 +212,22 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
         //create outer kp;
         //store annot in array
         //null otherwise
-
+        kp_selection = 'outer';
+        click_count = 0;
     });
     Mousetrap.bind('f', function (e){
         //create inner kp new div;
         //store annot in array
         //null otherwise
+        kp_selection = 'inner';
+        click_count = 0;
     });
     Mousetrap.bind('d', function (e){
         //create pupil kp;
         //store annot in array
         //null otherwise
+        kp_selection = 'pupil';
+        click_count = 0;
     });
     Mousetrap.bind('e', function (e){
         //mark eye state as closed
@@ -282,10 +321,50 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     }
 
     $("#mycanvas").click(function(e){
+
         var click_pos = getClickPosition(e);
         var click_pos_x = click_pos[0];
         var click_pos_y = click_pos[1];
-        drawPoint(click_pos_x, click_pos_y);
+
+        if (kp_selection == "outer"){
+            if (click_count == 0){
+                click_count = 1;
+                if (kp_outer_selection_count == 1) {
+                    clearPoint(kp_prev_outer_pos[0], kp_prev_outer_pos[1]);
+                    kp_outer_selection_count = 0
+                }
+                kp_selection == "outer"
+                kp_outer_selection_count = 1;
+                kp_prev_outer_pos = [click_pos_x, click_pos_y];
+                drawPoint(click_pos_x, click_pos_y, "#ED8FF8");
+            }
+        }
+        if (kp_selection == "pupil"){
+            if (click_count == 0){
+                click_count = 1;
+                if (kp_pupil_selection_count == 1){
+                    clearPoint(kp_prev_pupil_pos[0], kp_prev_pupil_pos[1]);
+                    kp_pupil_selection_count = 0;
+                }
+                kp_selection == "pupil"
+                kp_pupil_selection_count = 1;
+                kp_prev_pupil_pos = [click_pos_x, click_pos_y];
+                drawPoint(click_pos_x, click_pos_y, "#9AF9EF");
+            }
+        }
+        if (kp_selection == "inner"){
+            if (click_count == 0){
+                click_count = 1;
+                if (kp_inner_selection_count == 1){
+                    clearPoint(kp_prev_inner_pos[0], kp_prev_inner_pos[1]);
+                    kp_inner_selection_count = 0;
+                }
+                kp_selection == "inner"
+                kp_inner_selection_count = 1;
+                kp_prev_inner_pos = [click_pos_x, click_pos_y];
+                drawPoint(click_pos_x, click_pos_y, "#F7ED94");
+            }
+        }
     });
 
 </script>

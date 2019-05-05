@@ -36,16 +36,17 @@ function getClickPosition(event){
     return [x, y];
 }
 
-function drawPoint(x,y){
+function drawPoint(x,y, color){
     var ctx = document.getElementById("mycanvas").getContext("2d");
-
-    ctx.fillStyle = "#ff2626"; // Red color
-
+    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(x, y, 3, 0, Math.PI * 2, true);
     ctx.fill();
 }
 
-function clearPoint(x,y){
-
+function clearPoint(x, y){
+    var ctx = document.getElementById("mycanvas").getContext("2d");
+    ctx.beginPath();
+    ctx.clearRect(x-3-1, y - 3-1, 3*2+2, 3 * 2 + 2);
+    ctx.closePath();
 }
