@@ -4,259 +4,276 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Pupil Annotator</title>
-  <link rel="stylesheet" href="omnizoom/dist/omnizoom.css">
+
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <center><h2> Video annotation </h2></center>
-  <br>
+<div style="position: relative;">
+  <video id="video"></video>
+  <canvas class="canvas" id="mycanvas"></canvas>
 
-  <div id="outerContainer">
-    <div class="zoom-container" style="width: 100%; margin: 10px">
-  	<center><video ondragstart="return false" id="video" class="zoom" width=100% height=100%></video></center>
-    </div>
-    <!--<input type="file" accept="video/*" id="vid-input" style="display: none"/>-->
+  <div id="right_inner"></div>
+  <div id="right_pupil"></div>
+  <div id="right_outer"></div>
 
-    <div id="left_inner"></div>
-    <div id="left_pupil"></div>
-    <div id="left_outer"></div>
+</div>
 
-    <div id="right_inner"></div>
-    <div id="right_pupil"></div>
-    <div id="right_outer"></div>
-  </div>
-  <br>
-  <center>
-  <div id='frame-id-div' class="col-4" style="font-size:20px;">
-      <span class="info-label">Frame:</span>
-      <span id="frame-id">0</span>
-      <span class="info-max">(max: </span>
-      <span id="frame-id-max">0</span><span class="info-max">)</span>
-  </div>
-  <div id="frame-ts-div" class="col-4" style="font-size:20px;">
-      <span class="info-label">Secs:</span>
-      <span id="frame-ts">0</span>
-      <span class="info-max">(max: </span>
-      <span id="frame-ts-max">0</span><span class="info-max">)</span>
-  </div>
-  <div id="cmd-status-div" class="col-4" style="font-size:20px;">Command: <span id="cmd-status"> </span></div>
-  <!-- disabled temporarily uncomment to enable <button>Reset Frame Position</button>-->
-  <div id="results"></div>
-  <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
-  <button id="submit">Submit</button>
-  <button id="export">Export Annotations</button>
-  </center>
-  <br>
-  <br>
-  <br>
-  <script src="src/video_player.js"></script>
-  <script src="src/frame_drag.js"></script>
-  <script src="src/keypoints.js"></script>
+<br>
+CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
+Video: <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
+<input value="Export Annotations" type="button" id="export">
+<br>
+<br>
 
-  <script src="omnizoom/dist/omnizoom.min.js"></script>
-  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<br>
+<div id='frame-id-div' class="col-4" style="font-size:18px;">
+  <span class="info-label">Frame:</span>
+  <span id="frame-id">0</span>
+  <span class="info-max">(max: </span>
+  <span id="frame-id-max">0</span><span class="info-max">)</span>
+</div>
+<div id="frame-ts-div" class="col-4" style="font-size:18px;">
+  <span class="info-label">Secs:</span>
+  <span id="frame-ts">0</span>
+  <span class="info-max">(max: </span>
+  <span id="frame-ts-max">0</span><span class="info-max">)</span>
+</div>
+<div id="cmd-status-div" class="col-4" style="font-size:10px; display: None;">Command: <span id="cmd-status"> </span></div>
+<br>
+<br>
+<div id="shortcuts" style="font-size:18px;">
+  <b>Video Player Keyboard Shortcuts</b>
+  <div><span>v:</span>next frame</div>
+  <div><span>c:</span>previous frame</div>
+  <div><span>z:</span>restart video</div>
+  <div><span>x:</span>clear all annotations</div>
+  <div><span>w:</span>flag image as invalid</div>
+  <div><span>e:</span>eye closed</div>
+  <div><span>r:</span>eye open</div>
+  <div><span>s:</span>outer corner</div>
+  <div><span>d:</span>pupil</div>
+  <div><span>f:</span>inner corner</div>
+</div>
+<br>
+<br>
+<div class="instructions" style="font-size:18px;">
+  <b>Instructions:</b>
+  <ol>
+    <li>Upload .mp4 video file and corresponding .csv file</li>
+    <li>Go through each frame carefully</li>
+    <li>If a key point is incorrect, press the relevant keyboard shortcut and draw the correct one</li>
+  </ol>
+</div>
 
-  <script type="text/javascript" src="src/mousetrap.min.js"></script>
-  <script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
-  <script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
 
-  <script type="text/javascript">
-	// page elements
-	var vid = document.getElementById('video');
-    const container = document.getElementById("omnizoom-container");
-    var createObjectURL = (window.URL || window.webkitURL).createObjectURL;
-	var divFrameId = document.querySelector('#frame-id');
-	var divFrameTs = document.querySelector('#frame-ts');
-	var divCmdStatus = document.querySelector('#cmd-status');
-	var vidInput = document.querySelector('#vid-input');
+<script src="src/video_player.js"></script>
+<script src="src/frame_drag.js"></script>
+<script src="src/keypoints.js"></script>
 
-	// initialize keypoint variables
-    const left_pupil_kp = document.querySelector('#left_pupil');
-    const right_pupil_kp = document.querySelector('#right_pupil');
-    const left_inner_kp = document.querySelector('#left_inner');
-    const right_inner_kp = document.querySelector('#right_inner');
-    const left_outer_kp = document.querySelector('#left_outer');
-    const right_outer_kp = document.querySelector('#right_outer');
+<script src="omnizoom/dist/omnizoom.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-    //const aspect_ratio = parseFloat(1920)/parseFloat(1080);
-    var fps = 30;
-	var smallDelta = 0.001;
-	var playbackSpeed = 1;
+<script type="text/javascript" src="src/mousetrap.min.js"></script>
+<script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
+<script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
 
-    var DataFrame = dfjs.DataFrame;
-    // set up annotations df
-    var annotations = new DataFrame([],['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y']);
-    //annotations.show();
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 
-    // set key bindings
-	Mousetrap.bind('space', function (e) {
-		e.preventDefault();togglePlay();
-	});
-	Mousetrap.bind('left', function (e) {
-		takeStep(-1);
-	}, 'keydown');
-	Mousetrap.bind('right', function (e) {
-		takeStep(1);
-	}, 'keydown');
-	Mousetrap.bind('r', function (e) {
-		e.preventDefault();jump(0);
-	});
+<script type="text/javascript">
+  // page elements
+  var vid = document.getElementById('video');
+  const container = document.getElementById("omnizoom-container");
+  var createObjectURL = (window.URL || window.webkitURL).createObjectURL;
+  var divFrameId = document.querySelector('#frame-id');
+  var divFrameTs = document.querySelector('#frame-ts');
+  var divCmdStatus = document.querySelector('#cmd-status');
+  var vidInput = document.querySelector('#vid-input');
+  var csvInput = document.querySelector('#csv-input');
 
-	vid.ontimeupdate = function () {
-	    //updateCurrentState();
-        var cf = currentFrame();
-        if (cf >= 0) {
-            var result = DataFrame.sql.request(`SELECT pupil_x, pupil_y, inner_x, inner_y, outer_x, outer_y FROM tmp WHERE frame_num < ${cf+1} AND frame_num >= ${cf}`);
-            var result_array = result.toArray();
+  // initialize keypoint variables
+  const right_pupil_kp = document.querySelector('#right_pupil');
+  const right_inner_kp = document.querySelector('#right_inner');
+  const right_outer_kp = document.querySelector('#right_outer');
 
-            var left_pupil_x = parseFloat(result_array[0][0])//parseFloat(aspect_ratio);
-            var left_pupil_y = parseFloat(result_array[0][1]); ///parseFloat(aspect_ratio);
-            var right_pupil_x = parseFloat(result_array[1][0]); ///parseFloat(aspect_ratio);
-            var right_pupil_y = parseFloat(result_array[1][1]); ///parseFloat(aspect_ratio);
-            var left_inner_x = parseFloat(result_array[0][2])//parseFloat(aspect_ratio);
-            var left_inner_y = parseFloat(result_array[0][3]); ///parseFloat(aspect_ratio);
-            var right_inner_x = parseFloat(result_array[1][2]); ///parseFloat(aspect_ratio);
-            var right_inner_y = parseFloat(result_array[1][3]); ///parseFloat(aspect_ratio);
+  //const aspect_ratio = parseFloat(1920)/parseFloat(1080);
+  var fps = 30;
+  var smallDelta = 0.001;
+  var playbackSpeed = 1;
 
-            var left_outer_x = parseFloat(result_array[0][4])//parseFloat(aspect_ratio);
-            var left_outer_y = parseFloat(result_array[0][5]); ///parseFloat(aspect_ratio);
-            var right_outer_x = parseFloat(result_array[1][4]); ///parseFloat(aspect_ratio);
-            var right_outer_y = parseFloat(result_array[1][5]); ///parseFloat(aspect_ratio);
+  // set up df
+  var DataFrame = dfjs.DataFrame; // input csv
+  var annotations = new DataFrame([],['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'flag']);
 
-          left_pupil_kp.style.left = left_pupil_x-2.5 + 'px';
-          left_pupil_kp.style.top = left_pupil_y-2.5 + 'px';
+  // key point vars
+  var kp_selection = null;
+  var click_count = 0;
+  var kp_inner_selection_count = null;
+  var kp_outer_selection_count = null;
+  var kp_pupil_selection_count = null;
+  var kp_prev_inner_pos = null;
+  var kp_prev_outer_pos = null;
+  var kp_prev_pupil_pos = null;
 
-          right_pupil_kp.style.left = right_pupil_x-2.5 + 'px';
-          right_pupil_kp.style.top = right_pupil_y-2.5 + 'px';
+  // set key bindings
+  Mousetrap.bind('c', function (e) {
+    // prev frame
+    take_step(-1);
+  }, 'keydown');
+  Mousetrap.bind('v', function (e) {
+    // next frame
+    take_step(1);
+  }, 'keydown');
+  Mousetrap.bind('z', function (e) {
+    // restart video
+    e.preventDefault();jump(0);
+  });
+  Mousetrap.bind('w', function (e) {
+    //flag annotation as bad
+    annotations = annotations.setRow(current_frame(), row => row.set("flag", 1));
+    annotations.show();
+  });
+  Mousetrap.bind('s', function (e){
+    // select outer corner
+    kp_selection = 'outer';
+    click_count = 0;
+  });
+  Mousetrap.bind('d', function (e){
+    // select pupil
+    kp_selection = 'pupil';
+    click_count = 0;
+  });
+  Mousetrap.bind('f', function (e){
+    // select inner corner
+    kp_selection = 'inner';
+    click_count = 0;
+  });
+  Mousetrap.bind('e', function (e){
+    // set eye state to closed
+    annotations = annotations.setRow(current_frame(), row => row.set("eye_state", 0));
+    annotations.show();
+  });
+  Mousetrap.bind('r', function (e){
+    // set eye state to open
+    annotations = annotations.setRow(current_frame(), row => row.set("eye_state", 1));
+    annotations.show();
+  });
+  Mousetrap.bind('x', function(e) {
+    // clear all annotations
+    clear_all_points();
+    annotations = annotations.setRow(current_frame(), row => row.set("pupil_x", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("pupil_y", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("inner_x", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("inner_y", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("outer_x", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("outer_y", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("eye_state", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("flag", null));
+    annotations.show();
+  });
 
-          left_inner_kp.style.left = left_inner_x-2.5 + 'px';
-          left_inner_kp.style.top = left_inner_y-2.5 + 'px';
+  vid.ontimeupdate = function () {
+    //update_current_state();
+    var cf = current_frame();
+    clear_all_points();
+    if (cf >= 0) {
+      var result = DataFrame.sql.request(`SELECT frame_num, pupil_x, pupil_y, inner_x, inner_y, outer_x, outer_y FROM tmp WHERE frame_num < ${cf+1} AND frame_num >= ${cf} AND if_right_eye = True`);
+      var result_array = result.toArray();
 
-          right_inner_kp.style.left = right_inner_x-2.5 + 'px';
-          right_inner_kp.style.top = right_inner_y-2.5 + 'px';
+      var right_pupil_x = parseFloat(result_array[0][1]); ///parseFloat(aspect_ratio);
+      var right_pupil_y = parseFloat(result_array[0][2]); ///parseFloat(aspect_ratio);
+      var right_inner_x = parseFloat(result_array[0][3]); ///parseFloat(aspect_ratio);
+      var right_inner_y = parseFloat(result_array[0][4]); ///parseFloat(aspect_ratio);
+      var right_outer_x = parseFloat(result_array[0][5]); ///parseFloat(aspect_ratio);
+      var right_outer_y = parseFloat(result_array[0][6]); ///parseFloat(aspect_ratio);
 
-          left_outer_kp.style.left = left_outer_x-2.5 + 'px';
-          left_outer_kp.style.top = left_outer_y-2.5 + 'px';
+      right_pupil_kp.style.left = right_pupil_x-2.5 + 'px';
+      right_pupil_kp.style.top = right_pupil_y-2.5 + 'px';
+      right_inner_kp.style.left = right_inner_x-2.5 + 'px';
+      right_inner_kp.style.top = right_inner_y-2.5 + 'px';
+      right_outer_kp.style.left = right_outer_x-2.5 + 'px';
+      right_outer_kp.style.top = right_outer_y-2.5 + 'px';
 
-          right_outer_kp.style.left = right_outer_x-2.5 + 'px';
-          right_outer_kp.style.top = right_outer_y-2.5 + 'px';
-        }
-    };
-
-	// input vid on double click
-    $(vid).dblclick(function (e) {
-        e.preventDefault();
-        $(vidInput).trigger('click');
-    });
-
-    vidInput.addEventListener('change', playSelectedFile, false);
-    playVidServer('https://vidstep.com/data/count.mp4'); // default vid
-
-    // order of events once data is loaded
-    vid.onloadeddata = function () {
-        jump(0);
-        updateCurrentState();
-        DataFrame.fromCSV("data/scan_room_v2.csv").then(df => {
-            var ret = DataFrame.sql.registerTable(df, 'tmp', true);
-        });
-
-        $("#left_inner").draggable({
-          start: function () {
-            containment: "parent";
-          },
-          stop: function(){
-            coordinates('#left_inner');
-          }
-        });
-        $("#left_pupil").draggable({
-          start: function () {
-            containment: "parent";
-          },
-          stop: function(){
-            coordinates('#left_pupil');
-          }
-          });
-        $("#left_outer").draggable({
-          start: function () {
-            containment: "parent";
-          },
-          stop: function(){
-            coordinates('#left_outer');
-          }
-        });
-        $("#right_inner").draggable({
-          start: function () {
-            containment: "parent";
-          },
-          stop: function(){
-            coordinates('#right_inner');
-          }
-        });
-        $("#right_pupil").draggable({
-          start: function () {
-            containment: "parent";
-          },
-          stop: function(){
-            coordinates('#right_pupil');
-          }
-        });
-        $("#right_outer").draggable({
-          start: function () {
-            containment: "parent";
-          },
-          stop: function(){
-            coordinates('#right_outer');
-          }
-        });
-        $("button").click(function() {
-          const vid_elem = document.querySelector("#video");
-          vid_elem.style.left = 0;
-          vid_elem.style.top = 0;
-        });
-        $("#submit").click(function() {
-          var r_i = get_pos('#right_inner');
-          var r_p = get_pos('#right_pupil');
-          var r_o = get_pos('#right_outer');
-          var l_i = get_pos('#left_inner');
-          var l_p = get_pos('#left_pupil');
-          var l_o = get_pos('#left_outer');
-          var f_n = currentFrame();
-          //check x y because get pos changed
-          //col: ['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y']
-          var left_annot = [f_n, l_p[0], l_p[1], l_i[0], l_i[1], l_o[0], l_o[1]];
-          var right_annot = [f_n, r_p[0], r_p[1], r_i[0], r_i[1], r_o[0], r_o[1]];
-          annotations = annotations.push(left_annot, right_annot);
-          annotations.show();
-        });
-        $("#export").click(function() {
-          console.log("button does nothing");
-          //annotations.toCSV(true, 'data/scan_room_v2_fixed.csv');
-        })
+      var exists = check_if_annot_exists(current_frame());
+      if (!exists) {
+        var init_annot = [current_frame(), null, null, null, null, null, null, null, null];
+        annotations = annotations.push(init_annot);
+      }
     }
-	// end vidstep video player //
+  };
 
-    //curenntly disabled feature uncomment to enable
-    /*
-    // start vid frame pan/zoom //
-    document.getElementById('video').addEventListener('mousedown', start_drag);
-    document.getElementById('outerContainer').addEventListener('mousemove', while_drag);
-    document.getElementById('outerContainer').addEventListener('mouseup', stop_drag);
+  csvInput.addEventListener('change', load_csv, false);
+  vidInput.addEventListener('change', play_selected_file, false);
 
-    const zmy1 = new omnizoom.Zoomer();
-    zmy1.addElem(vid)
-            .addZoom()
-            .addPan();
+  // order of events once data is loaded
+  vid.onloadeddata = function () {
+    jump(0);
+    update_current_state();
+    resize_canvas(vid);
+    var init_annot = [current_frame(), null, null, null, null, null, null, null, null];
+    annotations = annotations.push(init_annot);
+  }
 
-    // end vid frame pan/zoom //
-    var img_ele = null,
-            x_cursor = 0,
-            y_cursor = 0,
-            x_img_ele = 0,
-            y_img_ele = 0;
-     */
-  </script>
+  // draw key point
+  $("#mycanvas").click(function(e){
+    var click_pos = get_click_position(e);
+    var click_pos_x = click_pos[0];
+    var click_pos_y = click_pos[1];
+
+    if (kp_selection == "outer"){
+      if (click_count == 0){
+        click_count = 1;
+        if (kp_outer_selection_count == 1) {
+          clear_point(kp_prev_outer_pos[0], kp_prev_outer_pos[1]);
+          kp_outer_selection_count = 0
+        }
+        kp_selection == "outer"
+        kp_outer_selection_count = 1;
+        kp_prev_outer_pos = [click_pos_x, click_pos_y];
+        draw_point(click_pos_x, click_pos_y, "#ED8FF8");
+        annotations = annotations.setRow(current_frame(), row => row.set("outer_x", click_pos_x));
+        annotations = annotations.setRow(current_frame(), row => row.set("outer_y", click_pos_y));
+      }
+    }
+    if (kp_selection == "pupil"){
+      if (click_count == 0){
+        click_count = 1;
+        if (kp_pupil_selection_count == 1){
+          clear_point(kp_prev_pupil_pos[0], kp_prev_pupil_pos[1]);
+          kp_pupil_selection_count = 0;
+        }
+        kp_selection == "pupil"
+        kp_pupil_selection_count = 1;
+        kp_prev_pupil_pos = [click_pos_x, click_pos_y];
+        draw_point(click_pos_x, click_pos_y, "#9AF9EF");
+        annotations = annotations.setRow(current_frame(), row => row.set("pupil_x", click_pos_x));
+        annotations = annotations.setRow(current_frame(), row => row.set("pupil_y", click_pos_y));
+      }
+    }
+    if (kp_selection == "inner"){
+      if (click_count == 0){
+        click_count = 1;
+        if (kp_inner_selection_count == 1){
+          clear_point(kp_prev_inner_pos[0], kp_prev_inner_pos[1]);
+          kp_inner_selection_count = 0;
+        }
+        kp_selection == "inner"
+        kp_inner_selection_count = 1;
+        kp_prev_inner_pos = [click_pos_x, click_pos_y];
+        draw_point(click_pos_x, click_pos_y, "#F7ED94");
+        annotations = annotations.setRow(current_frame(), row => row.set("inner_x", click_pos_x));
+        annotations = annotations.setRow(current_frame(), row => row.set("inner_y", click_pos_y));
+      }
+    }
+    annotations.show();
+  });
+
+  $("#export").click(function(e){
+    //export_csv(e);
+  });
+
+</script>
 
 </body>
 </html>
