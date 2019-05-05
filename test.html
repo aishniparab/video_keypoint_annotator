@@ -178,6 +178,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
         //create outer kp;
         //store annot in array
         //null otherwise
+
     });
     Mousetrap.bind('f', function (e){
         //create inner kp new div;
@@ -200,7 +201,8 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
         //null otherwise
     });
     Mousetrap.bind('x', function(e) {
-       //clear all ann;
+        var ctx = document.getElementById("mycanvas").getContext("2d");
+        ctx.clearRect(0, 0, mycanvas.width, mycanvas.height);
     });
 
     vid.ontimeupdate = function () {
@@ -280,27 +282,11 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     }
 
     $("#mycanvas").click(function(e){
-        getPosition(e);
+        var click_pos = getClickPosition(e);
+        var click_pos_x = click_pos[0];
+        var click_pos_y = click_pos[1];
+        drawPoint(click_pos_x, click_pos_y);
     });
-    var pointSize = 3;
-
-    function getPosition(event){
-        var rect = mycanvas.getBoundingClientRect();
-        var x = event.clientX - rect.left;
-        var y = event.clientY - rect.top;
-
-        drawCoordinates(x,y);
-    }
-
-    function drawCoordinates(x,y){
-        var ctx = document.getElementById("mycanvas").getContext("2d");
-
-        ctx.fillStyle = "#ff2626"; // Red color
-
-        ctx.beginPath();
-        ctx.arc(x, y, pointSize, 0, Math.PI * 2, true);
-        ctx.fill();
-    }
 
 </script>
 

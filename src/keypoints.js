@@ -28,3 +28,24 @@ function resize_canvas(element) {
     cv.width = w;
     cv.height = h;
 }
+
+function getClickPosition(event){
+    var rect = mycanvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+    return [x, y];
+}
+
+function drawPoint(x,y){
+    var ctx = document.getElementById("mycanvas").getContext("2d");
+
+    ctx.fillStyle = "#ff2626"; // Red color
+
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2, true);
+    ctx.fill();
+}
+
+function clearPoint(x,y){
+
+}
