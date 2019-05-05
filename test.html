@@ -24,69 +24,11 @@
 </div>
 
 <br>
-Video: <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
 CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
-
+Video: <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
+<input value="Export Annotations" type="button" id="export">
 <br>
 <br>
-<table>
-    <tr>
-
-        <td colspan="7">Model Prediction</td>
-        <td colspan="7">Display</td>
-    </tr>
-    <tr>
-        <td>Frame Info</td>
-        <td>&nbsp;</td>
-        <td>Left</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>Right</td>
-        <td>&nbsp;</td>
-
-        <td>Frame Info</td>
-        <td>&nbsp;</td>
-        <td>Left</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>Right</td>
-        <td>&nbsp;</td>
-
-    </tr>
-    <tr>
-        <td>#</td>
-        <td>Inner</td>
-        <td>Pupil</td>
-        <td>Outer</td>
-        <td>Inner</td>
-        <td>Pupil</td>
-        <td>Outer</td>
-        <td>#</td>
-        <td>Inner</td>
-        <td>Pupil</td>
-        <td>Outer</td>
-        <td>Inner</td>
-        <td>Pupil</td>
-        <td>Outer</td>
-    </tr>
-    <tr>
-        <td id="frame_num_csv">0</td>
-        <td id="csv_li">0, 0</td>
-        <td id="csv_lp">0, 0</td>
-        <td id="csv_lo">0, 0</td>
-        <td id="csv_ri">0, 0</td>
-        <td id="csv_rp">0, 0</td>
-        <td id="csv_ro">0, 0</td>
-        <td id="frame_num_disp">0</td>
-        <td id="disp_li">0, 0</td>
-        <td id="disp_lp">0, 0</td>
-        <td id="disp_lo">0, 0</td>
-        <td id="disp_ri">0, 0</td>
-        <td id="disp_rp">0, 0</td>
-        <td id="disp_ro">0, 0</td>
-    </tr>
-</table>
-
 
 <br>
 <div id='frame-id-div' class="col-4" style="font-size:18px;">
@@ -199,12 +141,15 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
 
     // set key bindings
     Mousetrap.bind('c', function (e) {
+        // prev frame
         takeStep(-1);
     }, 'keydown');
     Mousetrap.bind('v', function (e) {
+        // next frame
         takeStep(1);
     }, 'keydown');
     Mousetrap.bind('z', function (e) {
+        // restart video
         e.preventDefault();jump(0);
     });
     Mousetrap.bind('w', function (e) {
@@ -212,39 +157,30 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
         annotations = annotations.setRow(currentFrame(), row => row.set("flag", 1));
     });
     Mousetrap.bind('s', function (e){
-        //create outer kp;
-        //store annot in array
-        //null otherwise
+        // select outer corner
         kp_selection = 'outer';
         click_count = 0;
     });
-    Mousetrap.bind('f', function (e){
-        //create inner kp new div;
-        //store annot in array
-        //null otherwise
-        kp_selection = 'inner';
-        click_count = 0;
-    });
     Mousetrap.bind('d', function (e){
-        //create pupil kp;
-        //store annot in array
-        //null otherwise
+        // select pupil
         kp_selection = 'pupil';
         click_count = 0;
     });
+    Mousetrap.bind('f', function (e){
+        // select inner corner
+        kp_selection = 'inner';
+        click_count = 0;
+    });
     Mousetrap.bind('e', function (e){
-        //mark eye state as closed
-        //store annot in array
-        //null otherwise
+        // set eye state to closed
         annotations = annotations.setRow(currentFrame(), row => row.set("eye_state", 0));
     });
     Mousetrap.bind('r', function (e){
-        //create mark eye as open kp;
-        //store annot in array
-        //null otherwise
+        // set eye state to open
         annotations = annotations.setRow(currentFrame(), row => row.set("eye_state", 1));
     });
     Mousetrap.bind('x', function(e) {
+        // clear all annotations
         var ctx = document.getElementById("mycanvas").getContext("2d");
         ctx.clearRect(0, 0, mycanvas.width, mycanvas.height);
     });
@@ -296,34 +232,11 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
             right_outer_kp.style.left = right_outer_x-2.5 + 'px';
             right_outer_kp.style.top = right_outer_y-2.5 + 'px';
 
-            var init_annot = [currentFrame(), null, null, null, null, null, null, null, null];
-            annotations = annotations.push(init_annot);
-            // test elements
-            /*
-            frame_num_csv.innerHTML = result_array[0][0];
-            csv_li.innerHTML = `${left_inner_x}, ${left_inner_y}`;
-            csv_lp.innerHTML = `${left_pupil_x}, ${left_pupil_y}`;
-            csv_lo.innerHTML = `${left_outer_x}, ${left_outer_y}`;
-            csv_ri.innerHTML = `${right_inner_x}, ${right_inner_y}`;
-            csv_rp.innerHTML = `${right_pupil_x}, ${right_pupil_y}`;
-            csv_ro.innerHTML = `${right_outer_x}, ${right_outer_y}`;
-
-            var r_i = get_pos('#right_inner');
-            var r_p = get_pos('#right_pupil');
-            var r_o = get_pos('#right_outer');
-            var l_i = get_pos('#left_inner');
-            var l_p = get_pos('#left_pupil');
-            var l_o = get_pos('#left_outer');
-
-            frame_num_disp.innerHTML = currentFrame();
-            disp_li.innerHTML = `${l_i[0]+2.5}, ${l_i[1]+2.5}`;
-            disp_lp.innerHTML = `${l_p[0]+2.5}, ${l_p[1]+2.5}`;
-            disp_lo.innerHTML = `${l_o[0]+2.5}, ${l_o[1]+2.5}`;
-            disp_ri.innerHTML = `${r_i[0]+2.5}, ${r_i[1]+2.5}`;
-            disp_rp.innerHTML = `${r_p[0]+2.5}, ${r_p[1]+2.5}`;
-            disp_ro.innerHTML = `${r_o[0]+2.5}, ${r_o[1]+2.5}`;
-             */
-
+            var exists = check_if_annot_exists(currentFrame());
+            if (!exists) {
+                var init_annot = [currentFrame(), null, null, null, null, null, null, null, null];
+                annotations = annotations.push(init_annot);
+            }
         }
     };
 
@@ -340,11 +253,9 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     }
 
     $("#mycanvas").click(function(e){
-
         var click_pos = getClickPosition(e);
         var click_pos_x = click_pos[0];
         var click_pos_y = click_pos[1];
-
 
         if (kp_selection == "outer"){
             if (click_count == 0){
@@ -392,6 +303,10 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
             }
         }
         annotations.show();
+    });
+
+    $("#export").click(function(e){
+        console.log("test");
     });
 
 </script>

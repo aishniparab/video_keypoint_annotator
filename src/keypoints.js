@@ -50,3 +50,14 @@ function clearPoint(x, y){
     ctx.clearRect(x-3-1, y - 3-1, 3*2+2, 3 * 2 + 2);
     ctx.closePath();
 }
+
+function check_if_annot_exists(frame_num){
+    var ret_df = annotations.where({frame_num: frame_num});
+    if (ret_df.count() == 0){
+        return false
+    }
+    else{
+        return true
+    }
+}
+
