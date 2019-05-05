@@ -1,5 +1,5 @@
 // all functions used by the video_player
-var playSelectedFile = function (event) {
+var play_selected_file = function (event) {
     var file = this.files[0];
     var type = file.type;
     var canPlay = vid.canPlayType(type);
@@ -10,41 +10,40 @@ var playSelectedFile = function (event) {
     vid.src = fileURL;
 };
 
-function playVidServer(path) {
+function play_vid_server(path) {
     vid.src = path;
 }
 
-function updateCurrentState() {
-    divFrameId.innerHTML = currentFrame();
+function update_current_state() {
+    divFrameId.innerHTML = current_frame();
     var ct = vid.currentTime - smallDelta;
     divFrameTs.innerHTML = ct.toFixed(3);
 }
 
-function frameCount() {
+function frame_count() {
     return Math.round(vid.duration * fps);
 }
 
 function jump(frameId) {
     if (frameId < 0) {
-        frameId = frameCount() + frameId;
+        frameId = frame_count() + frameId;
     }
     var ct = frameId / fps;
     console.assert(ct >= 0 && ct <= vid.duration);
     ct += smallDelta;
     if (vid.currentTime !== ct) {
         vid.currentTime = ct;
-        updateCurrentState();
+        update_current_state();
     }
-    //updateCurrentAnn();
 }
 
-function currentFrame() {
+function current_frame() {
     var cf = Math.round(vid.currentTime * fps);
-    cf = Math.min(cf, frameCount() - 1);
+    cf = Math.min(cf, frame_count() - 1);
     return cf;
 }
 
-var fadeTimer = null;
+var fade_timer = null;
 function fadeCmd(cmdText) {
     if (fadeTimer) clearInterval(fadeTimer);
     var op = 1;
@@ -61,28 +60,23 @@ function fadeCmd(cmdText) {
     }, 50);
 }
 
-function takeStep(mag) {
+function take_step(mag) {
     if (!vid.paused) vid.pause();
 
-    var cf = currentFrame() + mag;
+    var cf = current_frame() + mag;
     cf = Math.max(0, cf);
-    cf = Math.min(cf, frameCount() -1 );
+    cf = Math.min(cf, frame_count() -1 );
     jump(cf);
 }
 
-function togglePlay() {
+function toggle_play() {
     if (vid.paused) {
-        fadeCmd('Play');
+        fade_cmd('Play');
         vid.playbackRate = playbackSpeed;
         vid.play();
     } else {
-        fadeCmd('Pause');
+        fade_cmd('Pause');
         vid.pause();
-        jump(currentFrame());
+        jump(current_frame());
     }
 }
-
-function displayAnnotations() {
-    // do nothing yet
-}
-

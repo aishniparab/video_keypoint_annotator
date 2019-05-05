@@ -7,6 +7,15 @@ var load_csv = function(event) {
     });
 };
 
+// does not work
+var export_csv = function(event) {
+    console.log("in export");
+    var file = 'output.csv';
+    console.log(file);
+    var fileURL = createObjectURL(file);
+    //annotations.toCSV(true, file);
+}
+
 var coordinates = function(element) {
     element = $(element);
     var top = element.position().top;
@@ -29,14 +38,14 @@ function resize_canvas(element) {
     cv.height = h;
 }
 
-function getClickPosition(event){
+function get_click_position(event){
     var rect = mycanvas.getBoundingClientRect();
     var x = event.clientX - rect.left;
     var y = event.clientY - rect.top;
     return [x, y];
 }
 
-function drawPoint(x,y, color){
+function draw_point(x,y, color){
     var ctx = document.getElementById("mycanvas").getContext("2d");
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -44,7 +53,7 @@ function drawPoint(x,y, color){
     ctx.fill();
 }
 
-function clearPoint(x, y){
+function clear_point(x, y){
     var ctx = document.getElementById("mycanvas").getContext("2d");
     ctx.beginPath();
     ctx.clearRect(x-3-1, y - 3-1, 3*2+2, 3 * 2 + 2);
@@ -59,5 +68,10 @@ function check_if_annot_exists(frame_num){
     else{
         return true
     }
+}
+
+function clear_all_points(){
+    var ctx = document.getElementById("mycanvas").getContext("2d");
+    ctx.clearRect(0, 0, mycanvas.width, mycanvas.height);
 }
 

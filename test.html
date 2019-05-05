@@ -13,10 +13,6 @@
     <video id="video"></video>
     <canvas class="canvas" id="mycanvas"></canvas>
 
-    <!--<div id="left_inner"></div>
-    <div id="left_pupil"></div>
-    <div id="left_outer"></div>-->
-
     <div id="right_inner"></div>
     <div id="right_pupil"></div>
     <div id="right_outer"></div>
@@ -96,28 +92,9 @@ Video: <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
     var vidInput = document.querySelector('#vid-input');
     var csvInput = document.querySelector('#csv-input');
 
-    // test elements
-    var frame_num_csv = document.querySelector('#frame_num_csv');
-    var csv_li = document.querySelector('#csv_li');
-    var csv_lp = document.querySelector('#csv_lp');
-    var csv_lo = document.querySelector('#csv_lo');
-    var csv_ri = document.querySelector('#csv_ri');
-    var csv_rp = document.querySelector('#csv_rp');
-    var csv_ro = document.querySelector('#csv_ro');
-    var frame_num_disp = document.querySelector('#frame_num_disp');
-    var disp_li = document.querySelector('#disp_li');
-    var disp_lp = document.querySelector('#disp_lp');
-    var disp_lo = document.querySelector('#disp_lo');
-    var disp_ri = document.querySelector('#disp_ri');
-    var disp_rp = document.querySelector('#disp_rp');
-    var disp_ro = document.querySelector('#disp_ro');
-
     // initialize keypoint variables
-    const left_pupil_kp = document.querySelector('#left_pupil');
     const right_pupil_kp = document.querySelector('#right_pupil');
-    const left_inner_kp = document.querySelector('#left_inner');
     const right_inner_kp = document.querySelector('#right_inner');
-    const left_outer_kp = document.querySelector('#left_outer');
     const right_outer_kp = document.querySelector('#right_outer');
 
     //const aspect_ratio = parseFloat(1920)/parseFloat(1080);
@@ -125,11 +102,11 @@ Video: <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
     var smallDelta = 0.001;
     var playbackSpeed = 1;
 
-    var DataFrame = dfjs.DataFrame;
-    // set up annotations df
+    // set up df
+    var DataFrame = dfjs.DataFrame; // input csv
     var annotations = new DataFrame([],['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'flag']);
 
-
+    // key point vars
     var kp_selection = null;
     var click_count = 0;
     var kp_inner_selection_count = null;
@@ -142,11 +119,11 @@ Video: <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
     // set key bindings
     Mousetrap.bind('c', function (e) {
         // prev frame
-        takeStep(-1);
+        take_step(-1);
     }, 'keydown');
     Mousetrap.bind('v', function (e) {
         // next frame
-        takeStep(1);
+        take_step(1);
     }, 'keydown');
     Mousetrap.bind('z', function (e) {
         // restart video
@@ -154,7 +131,8 @@ Video: <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
     });
     Mousetrap.bind('w', function (e) {
        //flag annotation as bad
-        annotations = annotations.setRow(currentFrame(), row => row.set("flag", 1));
+        annotations = annotations.setRow(current_frame(), row => row.set("flag", 1));
+        annotations.show();
     });
     Mousetrap.bind('s', function (e){
         // select outer corner
@@ -173,24 +151,34 @@ Video: <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
     });
     Mousetrap.bind('e', function (e){
         // set eye state to closed
-        annotations = annotations.setRow(currentFrame(), row => row.set("eye_state", 0));
+        annotations = annotations.setRow(current_frame(), row => row.set("eye_state", 0));
+        annotations.show();
     });
     Mousetrap.bind('r', function (e){
         // set eye state to open
-        annotations = annotations.setRow(currentFrame(), row => row.set("eye_state", 1));
+        annotations = annotations.setRow(current_frame(), row => row.set("eye_state", 1));
+        annotations.show();
     });
     Mousetrap.bind('x', function(e) {
         // clear all annotations
-        var ctx = document.getElementById("mycanvas").getContext("2d");
-        ctx.clearRect(0, 0, mycanvas.width, mycanvas.height);
+        clear_all_points();
+        annotations = annotations.setRow(current_frame(), row => row.set("pupil_x", null));
+        annotations = annotations.setRow(current_frame(), row => row.set("pupil_y", null));
+        annotations = annotations.setRow(current_frame(), row => row.set("inner_x", null));
+        annotations = annotations.setRow(current_frame(), row => row.set("inner_y", null));
+        annotations = annotations.setRow(current_frame(), row => row.set("outer_x", null));
+        annotations = annotations.setRow(current_frame(), row => row.set("outer_y", null));
+        annotations = annotations.setRow(current_frame(), row => row.set("eye_state", null));
+        annotations = annotations.setRow(current_frame(), row => row.set("flag", null));
+        annotations.show();
     });
 
     vid.ontimeupdate = function () {
-        //updateCurrentState();
-        var cf = currentFrame();
+        //update_current_state();
+        var cf = current_frame();
+        clear_all_points();
         if (cf >= 0) {
             var result = DataFrame.sql.request(`SELECT frame_num, pupil_x, pupil_y, inner_x, inner_y, outer_x, outer_y FROM tmp WHERE frame_num < ${cf+1} AND frame_num >= ${cf} AND if_right_eye = True`);
-            result.show();
             var result_array = result.toArray();
 
             var right_pupil_x = parseFloat(result_array[0][1]); ///parseFloat(aspect_ratio);
@@ -207,28 +195,29 @@ Video: <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
             right_outer_kp.style.left = right_outer_x-2.5 + 'px';
             right_outer_kp.style.top = right_outer_y-2.5 + 'px';
 
-            var exists = check_if_annot_exists(currentFrame());
+            var exists = check_if_annot_exists(current_frame());
             if (!exists) {
-                var init_annot = [currentFrame(), null, null, null, null, null, null, null, null];
+                var init_annot = [current_frame(), null, null, null, null, null, null, null, null];
                 annotations = annotations.push(init_annot);
             }
         }
     };
 
-    vidInput.addEventListener('change', playSelectedFile, false);
     csvInput.addEventListener('change', load_csv, false);
+    vidInput.addEventListener('change', play_selected_file, false);
 
     // order of events once data is loaded
     vid.onloadeddata = function () {
         jump(0);
-        updateCurrentState();
+        update_current_state();
         resize_canvas(vid);
-        var init_annot = [currentFrame(), null, null, null, null, null, null, null, null];
+        var init_annot = [current_frame(), null, null, null, null, null, null, null, null];
         annotations = annotations.push(init_annot);
     }
 
+    // draw key point
     $("#mycanvas").click(function(e){
-        var click_pos = getClickPosition(e);
+        var click_pos = get_click_position(e);
         var click_pos_x = click_pos[0];
         var click_pos_y = click_pos[1];
 
@@ -236,52 +225,52 @@ Video: <input type="file" accept="video/*" id="vid-input" style="width:200px"/>
             if (click_count == 0){
                 click_count = 1;
                 if (kp_outer_selection_count == 1) {
-                    clearPoint(kp_prev_outer_pos[0], kp_prev_outer_pos[1]);
+                    clear_point(kp_prev_outer_pos[0], kp_prev_outer_pos[1]);
                     kp_outer_selection_count = 0
                 }
                 kp_selection == "outer"
                 kp_outer_selection_count = 1;
                 kp_prev_outer_pos = [click_pos_x, click_pos_y];
-                drawPoint(click_pos_x, click_pos_y, "#ED8FF8");
-                annotations = annotations.setRow(currentFrame(), row => row.set("outer_x", click_pos_x));
-                annotations = annotations.setRow(currentFrame(), row => row.set("outer_y", click_pos_y));
+                draw_point(click_pos_x, click_pos_y, "#ED8FF8");
+                annotations = annotations.setRow(current_frame(), row => row.set("outer_x", click_pos_x));
+                annotations = annotations.setRow(current_frame(), row => row.set("outer_y", click_pos_y));
             }
         }
         if (kp_selection == "pupil"){
             if (click_count == 0){
                 click_count = 1;
                 if (kp_pupil_selection_count == 1){
-                    clearPoint(kp_prev_pupil_pos[0], kp_prev_pupil_pos[1]);
+                    clear_point(kp_prev_pupil_pos[0], kp_prev_pupil_pos[1]);
                     kp_pupil_selection_count = 0;
                 }
                 kp_selection == "pupil"
                 kp_pupil_selection_count = 1;
                 kp_prev_pupil_pos = [click_pos_x, click_pos_y];
-                drawPoint(click_pos_x, click_pos_y, "#9AF9EF");
-                annotations = annotations.setRow(currentFrame(), row => row.set("pupil_x", click_pos_x));
-                annotations = annotations.setRow(currentFrame(), row => row.set("pupil_y", click_pos_y));
+                draw_point(click_pos_x, click_pos_y, "#9AF9EF");
+                annotations = annotations.setRow(current_frame(), row => row.set("pupil_x", click_pos_x));
+                annotations = annotations.setRow(current_frame(), row => row.set("pupil_y", click_pos_y));
             }
         }
         if (kp_selection == "inner"){
             if (click_count == 0){
                 click_count = 1;
                 if (kp_inner_selection_count == 1){
-                    clearPoint(kp_prev_inner_pos[0], kp_prev_inner_pos[1]);
+                    clear_point(kp_prev_inner_pos[0], kp_prev_inner_pos[1]);
                     kp_inner_selection_count = 0;
                 }
                 kp_selection == "inner"
                 kp_inner_selection_count = 1;
                 kp_prev_inner_pos = [click_pos_x, click_pos_y];
-                drawPoint(click_pos_x, click_pos_y, "#F7ED94");
-                annotations = annotations.setRow(currentFrame(), row => row.set("inner_x", click_pos_x));
-                annotations = annotations.setRow(currentFrame(), row => row.set("inner_y", click_pos_y));
+                draw_point(click_pos_x, click_pos_y, "#F7ED94");
+                annotations = annotations.setRow(current_frame(), row => row.set("inner_x", click_pos_x));
+                annotations = annotations.setRow(current_frame(), row => row.set("inner_y", click_pos_y));
             }
         }
         annotations.show();
     });
 
     $("#export").click(function(e){
-        console.log("test");
+        //export_csv(e);
     });
 
 </script>
