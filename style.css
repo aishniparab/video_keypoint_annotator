@@ -1,7 +1,8 @@
 html * {
   font-family: monospace;
+  font-size: 18px;
 }
-table {
+.table {
   font-family: arial, sans-serif;
   border-collapse: collapse;
   width: 50%;
@@ -14,7 +15,7 @@ td, th {
   padding: 8px;
 }
 
-tr:nth-child(even) {
+tr:nth-child(odd) {
   background-color: #dddddd;
 }
 .canvas {
@@ -34,46 +35,25 @@ tr:nth-child(even) {
   height: 5px;
   background-color: rgb(245, 230, 99);
   border-radius: 50%;
-  touch-action: none;
-  user-select: none;
   position: absolute;
   z-index: 5;
 }
 #right_inner:active {
   background-color: rgba(168, 218, 220, 1.00);
 }
-#right_inner:hover {
-  cursor: pointer;
-}
 #right_outer {
   width: 5px;
   height: 5px;
   background-color: rgb(230, 99, 245);
   border-radius: 50%;
-  touch-action: none;
-  user-select: none;
   position: absolute;
   z-index: 5;
-}
-#right_outer:active {
-  background-color: rgba(168, 218, 220, 1.00);
-}
-#right_outer:hover {
-  cursor: pointer;
 }
 #right_pupil {
   width: 5px;
   height: 5px;
   background-color: rgb(23, 250, 198);
   border-radius: 50%;
-  touch-action: none;
-  user-select: none;
   position: absolute;
   z-index: 5;
-}
-#right_pupil:active {
-  background-color: rgba(168, 218, 220, 1.00);
-}
-#right_pupil:hover {
-  cursor: pointer;
 }
