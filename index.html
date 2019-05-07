@@ -234,6 +234,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   });
   Mousetrap.bind('w', function (e) {
     //flag annotation as bad
+
     annotations = annotations.setRow(current_frame(), row => row.set("flag", 1));
     disp_flag.innerHTML = "1"; // update table display
   });
@@ -310,12 +311,26 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     console.assert(df_count/2 == frame_count());
 
     // initialize
-    var init_annot = [current_frame(), null, null, null, null, null, null, null, null];
-    annotations = annotations.push(init_annot);
+    const frame_num_array = [...Array(frame_count()).keys()];
+    const null_array = new Array(frame_count()).fill(null);
+    annotations = new DataFrame({
+      frame_num: frame_num_array,
+      pupil_x: null_array,
+      pupil_y: null_array,
+      inner_x: null_array,
+      inner_y: null_array,
+      outer_x: null_array,
+      outer_y: null_array,
+      eye_state: null_array,
+      flag: null_array,
+    },['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'flag']);
+    //var init_annot = [current_frame(), null, null, null, null, null, null, null, null];
+    //annotations = annotations.push(init_annot);
+    annotations.show();
     jump(0);
     update_current_state();
     resize_canvas(vid);
-    frame_max.innerHTML = frame_count() + 1;
+    frame_max.innerHTML = frame_count()-1;
     vid_max.innerHTML = vid.duration;
     document.getElementById("export").style.display = "inline";
   }
