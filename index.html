@@ -324,9 +324,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
       eye_state: null_array,
       flag: null_array,
     },['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'flag']);
-    //var init_annot = [current_frame(), null, null, null, null, null, null, null, null];
-    //annotations = annotations.push(init_annot);
-    annotations.show();
+    
     jump(0);
     update_current_state();
     resize_canvas(vid);
