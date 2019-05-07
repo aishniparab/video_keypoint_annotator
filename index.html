@@ -45,13 +45,13 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
 <div style="width: 500px position: relative; margin-bottom: 240px; margin-top: 50px">
   <div style="float: left; position: absolute;">
     Model Prediction:
-    <div style="border: 5px solid green; height: 100px; width: 100px; text-align: center; margin-left: 25px; margin-top: 5px;">
+    <div id="model-eye-state-box" style="border: 5px solid black; height: 100px; width: 100px; text-align: center; margin-left: 25px; margin-top: 5px;">
       <div id="disp_model_eye_state" style="padding-top: 40px">null</div>
     </div>
   </div>
   <div style="float: right; position: absolute; margin-left: 250px;">
     Your Prediction:
-    <div style="border: 5px solid black; height: 100px; width: 100px; text-align: center; margin-left: 25px; margin-top: 5px;">
+    <div id="annot-eye-state-box" style="border: 5px solid black; height: 100px; width: 100px; text-align: center; margin-left: 25px; margin-top: 5px;">
       <div id="disp_eye_state" style="padding-top: 40px;">null</div>
     </div>
   </div>
@@ -257,12 +257,15 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     annotations = annotations.setRow(current_frame(), row => row.set("eye_state", 0));
     disp_eye_state.innerHTML = "closed";
     eye_state.innerHTML = "closed";
+    document.getElementById("annot-eye-state-box").style.borderColor = "#C0FF96";
   });
   Mousetrap.bind('r', function (e){
     // set eye state to open
     annotations = annotations.setRow(current_frame(), row => row.set("eye_state", 1));
     disp_eye_state.innerHTML = "open";
     eye_state.innerHTML = "open";
+    document.getElementById("annot-eye-state-box").style.borderColor = "#2FA5FF";
+
   });
   Mousetrap.bind('x', function(e) {
     // clear all annotations from display
@@ -283,6 +286,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     disp_ri.innerHTML = "null, null";
     disp_eye_state.innerHTML = "null";
     disp_flag.innerHTML = "null";
+    document.getElementById("annot-eye-state-box").style.borderColor = "black";
   });
 
 

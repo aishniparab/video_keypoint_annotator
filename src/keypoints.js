@@ -88,8 +88,10 @@ function display_model_predictions(cf) {
     right_outer_kp.style.top = right_outer_y - 2.5 + 'px';
     if (result_array[0][7] >= 0.5) {
         disp_model_eye_state.innerHTML = "open";
+        document.getElementById("model-eye-state-box").style.borderColor = "#2FA5FF";
     } else {
         disp_model_eye_state.innerHTML = "closed";
+        document.getElementById("model-eye-state-box").style.borderColor = "#C0FF96";
     }
 }
 
@@ -108,6 +110,7 @@ function display_annotations(cf){
         disp_eye_state.innerHTML = "null";
         eye_state.innerHTML = "null";
         disp_flag.innerHTML = "null";
+        document.getElementById("annot-eye-state-box").style.borderColor = "black";
     }
     else {
         // redraw points
@@ -132,14 +135,17 @@ function display_annotations(cf){
         if (annot_eye_state === 1) {
             disp_eye_state.innerHTML = "open";
             eye_state.innerHTML = "open";
+            document.getElementById("annot-eye-state-box").style.borderColor = "#2FA5FF";
         }
         else if (annot_eye_state === 0) {
             disp_eye_state.innerHTML = "closed";
             eye_state.innerHTML = "closed";
+            document.getElementById("annot-eye-state-box").style.borderColor = "#C0FF96";
         }
         else {
             disp_eye_state.innerHTML = "null";
             eye_state.innerHTML = "null";
+            document.getElementById("annot-eye-state-box").style.borderColor = "black";
         }
         disp_flag.innerHTML = `${annot_flag}`;
     }
