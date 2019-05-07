@@ -10,28 +10,7 @@
 
 <body>
 
-<div style="float: right;">
-  Your Annotations:
-  <table>
-    <tr>
-    <td>Frame</td>
-    <td>Outer</td>
-    <td>Pupil</td>
-    <td>Inner</td>
-    <td>Eye State</td>
-    <td>Flag</td>
-    </tr>
-    <tr>
-      <td id="disp_frame_num">null</td>
-      <td id="disp_ro">null</td>
-      <td id="disp_rp">null</td>
-      <td id="disp_ri">null</td>
-      <td id="disp_eye_state">null</td>
-      <td id="disp_flag">null</td>
-    </tr>
-  </table>
-</div>
-
+<!-- video -->
 <div style="position: relative;">
   <video id="video"></video>
   <canvas class="canvas" id="mycanvas"></canvas>
@@ -41,55 +20,142 @@
   <div id="right_outer"></div>
 </div>
 
+<!-- buttons -->
 <br>
 CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
 <div id="vid-input-div" style="display: none;">Video: <input type="file" accept="video/*" id="vid-input" style="width:200px;"/></div>
 <input value="Export Annotations" type="button" id="export" style="display: none;">
-
 <br>
 <br>
 
-<br>
-<div id='frame-id-div' class="col-4" style="font-size:18px;">
+<!-- video state: frame and time info -->
+<div id='frame-div' class="col-8" style="font-size:18px;">
   <span class="info-label">Frame:</span>
   <span id="frame-id">0</span>
   <span class="info-max">(max: </span>
   <span id="frame-id-max">0</span><span class="info-max">)</span>
-</div>
-<div id="frame-ts-div" class="col-4" style="font-size:18px;">
-  <span class="info-label">Secs:</span>
+  <span class="info-label" style="margin-left: 30px">Secs:</span>
   <span id="frame-ts">0</span>
   <span class="info-max">(max: </span>
   <span id="frame-ts-max">0</span><span class="info-max">)</span>
 </div>
 <div id="cmd-status-div" class="col-4" style="font-size:10px; display: None;">Command: <span id="cmd-status"> </span></div>
-<br>
-<br>
-<div id="shortcuts" style="font-size:18px;">
-  <b>Video Player Keyboard Shortcuts</b>
-  <div><span>v:</span>next frame</div>
-  <div><span>c:</span>previous frame</div>
-  <div><span>z:</span>restart video</div>
-  <div><span>x:</span>clear all annotations</div>
-  <div><span>w:</span>flag image as invalid</div>
-  <div><span>e:</span>eye closed</div>
-  <div><span>r:</span>eye open</div>
-  <div><span>s:</span>outer corner</div>
-  <div><span>d:</span>pupil</div>
-  <div><span>f:</span>inner corner</div>
+
+<!-- eye state -->
+<div style="width: 500px position: relative; margin-bottom: 240px; margin-top: 50px">
+  <div style="float: left; position: absolute;">
+    Model Prediction:
+    <div style="border: 5px solid green; height: 100px; width: 100px; text-align: center; margin-left: 25px; margin-top: 5px;">
+      <div id="disp_model_eye_state" style="padding-top: 40px">null</div>
+    </div>
+  </div>
+  <div style="float: right; position: absolute; margin-left: 250px;">
+    Your Prediction:
+    <div style="border: 5px solid black; height: 100px; width: 100px; text-align: center; margin-left: 25px; margin-top: 5px;">
+      <div id="disp_eye_state" style="padding-top: 40px;">null</div>
+    </div>
+  </div>
+</div>
+
+<!-- annotation display -->
+<div>
+  Your Annotations:
+  <table>
+    <tr>
+      <td>Frame</td>
+      <td>Outer</td>
+      <td>Pupil</td>
+      <td>Inner</td>
+      <td>Eye State</td>
+      <td>Flag</td>
+    </tr>
+    <tr>
+      <td id="disp_frame_num">null</td>
+      <td id="disp_ro">null</td>
+      <td id="disp_rp">null</td>
+      <td id="disp_ri">null</td>
+      <td id="eye_state">null</td>
+      <td id="disp_flag">null</td>
+    </tr>
+  </table>
 </div>
 <br>
 <br>
+<br>
+<!-- usage instructions -->
+<b>Video Player Keyboard Shortcuts</b>
+<div id="shortcuts" style="font-size:12px;">
+  <ul id="keys-freebie">
+  <li>
+    <div class="key">
+      <span>w</span>
+    </div>
+    <div class="label">invalid</div>
+    <div class="key">
+      <span>s</span>
+    </div>
+    <div class="label">outer</div>
+    <div class="key">
+      <span>z</span>
+    </div>
+    <div class="label">restart</div>
+  </li>
+  <li>
+    <div class="key">
+      <span>e</span>
+    </div>
+    <div class="label">closed</div>
+    <div class="key">
+      <span>d</span>
+    </div>
+    <div class="label">pupil</div>
+    <div class="key">
+      <span>x</span>
+    </div>
+    <div class="label">clear</div>
+  </li>
+  <li>
+    <div class="key">
+      <span>r</span>
+    </div>
+    <div class="label">open</div>
+    <div class="key">
+      <span>f</span>
+    </div>
+    <div class="label">inner</div>
+    <div class="key">
+      <span>c</span>
+    </div>
+    <div class="label">prev</div>
+  </li>
+    <li>
+      <div class="key">
+        <span style="display: none;"> </span>
+      </div>
+      <div class="label"> </div>
+      <div class="key">
+        <span style="display: none;"> </span>
+      </div>
+      <div class="label"> </div>
+      <div class="key">
+        <span>v</span>
+      </div>
+      <div class="label">next</div>
+    </li>
+  </ul>
+</div>
+
 <div class="instructions" style="font-size:18px;">
   <b>Instructions:</b>
   <ol>
-    <li>Upload .mp4 video file and corresponding .csv file</li>
+    <li>Upload .csv file and corresponding .mp4 file</li>
     <li>Go through each frame carefully</li>
-    <li>If a key point is incorrect, press the relevant keyboard shortcut and draw the correct one</li>
+    <li>If a key point is incorrect, select the relevant keyboard shortcut and draw the correct one</li>
+    <li>At the end of the video, export your annoations</li>
   </ol>
 </div>
 
-
+<!-- javascript source files -->
 <script src="src/video_player.js"></script>
 <script src="src/frame_drag.js"></script>
 <script src="src/keypoints.js"></script>
@@ -116,6 +182,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   var csvInput = document.querySelector('#csv-input');
   var vid_max = document.querySelector('#frame-ts-max');
   var frame_max = document.querySelector('#frame-id-max');
+  var disp_model_eye_state = document.querySelector('#disp_model_eye_state');
 
   // initialize keypoint variables for df
   const right_pupil_kp = document.querySelector('#right_pupil');
@@ -148,6 +215,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   var disp_ro = document.querySelector('#disp_ro');
   var disp_eye_state = document.querySelector('#disp_eye_state');
   var disp_flag = document.querySelector('#disp_flag');
+  var eye_state = document.querySelector('#eye_state');
 
   // set key bindings
   Mousetrap.bind('c', function (e) {
@@ -188,11 +256,13 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     // set eye state to closed
     annotations = annotations.setRow(current_frame(), row => row.set("eye_state", 0));
     disp_eye_state.innerHTML = "closed";
+    eye_state.innerHTML = "closed";
   });
   Mousetrap.bind('r', function (e){
     // set eye state to open
     annotations = annotations.setRow(current_frame(), row => row.set("eye_state", 1));
     disp_eye_state.innerHTML = "open";
+    eye_state.innerHTML = "open";
   });
   Mousetrap.bind('x', function(e) {
     // clear all annotations from display
@@ -208,12 +278,13 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     annotations = annotations.setRow(current_frame(), row => row.set("flag", null));
     // update display
     disp_frame_num.innerHTML = current_frame();
-    disp_ro.innerHTML = "null";
-    disp_rp.innerHTML = "null";
-    disp_ri.innerHTML = "null";
+    disp_ro.innerHTML = "null, null";
+    disp_rp.innerHTML = "null, null";
+    disp_ri.innerHTML = "null, null";
     disp_eye_state.innerHTML = "null";
     disp_flag.innerHTML = "null";
   });
+
 
   vid.ontimeupdate = function () {
     //update_current_state();
@@ -221,6 +292,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     clear_all_points();
     if (cf >= 0) {
       display_model_predictions(cf);
+      display_annotations(cf);
     }
   };
 
@@ -229,6 +301,13 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
 
   // order of events once video is loaded
   vid.onloadeddata = function () {
+    // assert # frames in csv and video match
+    var df_count = DataFrame.sql.request(`SELECT COUNT(*) FROM tmp`);
+    console.assert(df_count/2 == frame_count());
+
+    // initialize
+    var init_annot = [current_frame(), null, null, null, null, null, null, null, null];
+    annotations = annotations.push(init_annot);
     jump(0);
     update_current_state();
     resize_canvas(vid);
@@ -253,7 +332,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
         kp_selection = "outer";
         kp_outer_selection_count = 1;
         kp_prev_outer_pos = [click_pos_x, click_pos_y];
-        draw_point(click_pos_x, click_pos_y, "#ED8FF8");
+        draw_point(click_pos_x, click_pos_y, "#2FA5FF");
         annotations = annotations.setRow(current_frame(), row => row.set("outer_x", click_pos_x));
         annotations = annotations.setRow(current_frame(), row => row.set("outer_y", click_pos_y));
         disp_ro.innerHTML = `${click_pos_x}, ${click_pos_y}`; // update table display
@@ -269,7 +348,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
         kp_selection = "pupil";
         kp_pupil_selection_count = 1;
         kp_prev_pupil_pos = [click_pos_x, click_pos_y];
-        draw_point(click_pos_x, click_pos_y, "#9AF9EF");
+        draw_point(click_pos_x, click_pos_y, "#C0FF96");
         annotations = annotations.setRow(current_frame(), row => row.set("pupil_x", click_pos_x));
         annotations = annotations.setRow(current_frame(), row => row.set("pupil_y", click_pos_y));
         disp_rp.innerHTML = `${click_pos_x}, ${click_pos_y}`; // update table display
@@ -285,7 +364,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
         kp_selection = "inner";
         kp_inner_selection_count = 1;
         kp_prev_inner_pos = [click_pos_x, click_pos_y];
-        draw_point(click_pos_x, click_pos_y, "#F7ED94");
+        draw_point(click_pos_x, click_pos_y, "#FF3521");
         annotations = annotations.setRow(current_frame(), row => row.set("inner_x", click_pos_x));
         annotations = annotations.setRow(current_frame(), row => row.set("inner_y", click_pos_y));
         disp_ri.innerHTML = `${click_pos_x}, ${click_pos_y}`; // update table display

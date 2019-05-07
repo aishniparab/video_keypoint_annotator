@@ -1,4 +1,5 @@
-// all functions that deal with keypoints
+// all functions that deal with key points
+
 var load_csv = function(event) {
     var file = this.files[0];
     var fileURL = createObjectURL(file);
@@ -6,10 +7,6 @@ var load_csv = function(event) {
     DataFrame.fromCSV(file).then(df => {
         var ret = DataFrame.sql.registerTable(df, 'tmp', true);
     });
-
-    // initialize
-    var init_annot = [current_frame(), null, null, null, null, null, null, null, null];
-    annotations = annotations.push(init_annot);
     document.getElementById("vid-input-div").style.display = "inline";
 };
 
@@ -71,8 +68,8 @@ function clear_all_points(){
     ctx.clearRect(0, 0, mycanvas.width, mycanvas.height);
 }
 
-function display_model_predictions(cf){
-    var result = DataFrame.sql.request(`SELECT frame_num, pupil_x, pupil_y, inner_x, inner_y, outer_x, outer_y FROM tmp WHERE frame_num < ${cf+1} AND frame_num >= ${cf} AND if_right_eye = True`);
+function display_model_predictions(cf) {
+    var result = DataFrame.sql.request(`SELECT frame_num, pupil_x, pupil_y, inner_x, inner_y, outer_x, outer_y, eye_state FROM tmp WHERE frame_num < ${cf + 1} AND frame_num >= ${cf} AND if_right_eye = True`);
     var result_array = result.toArray();
 
     var right_pupil_x = parseFloat(result_array[0][1]); ///parseFloat(aspect_ratio);
@@ -83,30 +80,38 @@ function display_model_predictions(cf){
     var right_outer_y = parseFloat(result_array[0][6]); ///parseFloat(aspect_ratio);
 
     // display model predictions
-    right_pupil_kp.style.left = right_pupil_x-2.5 + 'px';
-    right_pupil_kp.style.top = right_pupil_y-2.5 + 'px';
-    right_inner_kp.style.left = right_inner_x-2.5 + 'px';
-    right_inner_kp.style.top = right_inner_y-2.5 + 'px';
-    right_outer_kp.style.left = right_outer_x-2.5 + 'px';
-    right_outer_kp.style.top = right_outer_y-2.5 + 'px';
+    right_pupil_kp.style.left = right_pupil_x - 2.5 + 'px';
+    right_pupil_kp.style.top = right_pupil_y - 2.5 + 'px';
+    right_inner_kp.style.left = right_inner_x - 2.5 + 'px';
+    right_inner_kp.style.top = right_inner_y - 2.5 + 'px';
+    right_outer_kp.style.left = right_outer_x - 2.5 + 'px';
+    right_outer_kp.style.top = right_outer_y - 2.5 + 'px';
+    if (result_array[0][7] >= 0.5) {
+        disp_model_eye_state.innerHTML = "open";
+    } else {
+        disp_model_eye_state.innerHTML = "closed";
+    }
+}
 
-    var exists = check_if_annot_exists(current_frame());
-    if (!exists) {
+function display_annotations(cf){
+    var exists_ret = check_if_annot_exists(current_frame());
+    if (!exists_ret) {
         // push init annotation if it doesn't already exist
         var init_annot = [current_frame(), null, null, null, null, null, null, null, null];
         annotations = annotations.push(init_annot);
 
         // update display
         disp_frame_num.innerHTML = current_frame();
-        disp_ro.innerHTML = "null";
-        disp_rp.innerHTML = "null";
-        disp_ri.innerHTML = "null";
+        disp_ro.innerHTML = "null, null";
+        disp_rp.innerHTML = "null, null";
+        disp_ri.innerHTML = "null, null";
         disp_eye_state.innerHTML = "null";
+        eye_state.innerHTML = "null";
         disp_flag.innerHTML = "null";
     }
     else {
         // redraw points
-        var row = exists.find({'frame_num': current_frame()});
+        var row = exists_ret.find({'frame_num': current_frame()});
         var annot_outer_x = row.get('outer_x');
         var annot_outer_y = row.get('outer_y');
         var annot_pupil_x = row.get('pupil_x');
@@ -124,7 +129,18 @@ function display_model_predictions(cf){
         disp_ro.innerHTML = `${annot_outer_x}, ${annot_outer_y}`;
         disp_rp.innerHTML = `${annot_pupil_x}, ${annot_pupil_y}`;
         disp_ri.innerHTML = `${annot_inner_x}, ${annot_inner_y}`;
-        disp_eye_state.innerHTML = `${annot_eye_state}`;
+        if (annot_eye_state === 1) {
+            disp_eye_state.innerHTML = "open";
+            eye_state.innerHTML = "open";
+        }
+        else if (annot_eye_state === 0) {
+            disp_eye_state.innerHTML = "closed";
+            eye_state.innerHTML = "closed";
+        }
+        else {
+            disp_eye_state.innerHTML = "null";
+            eye_state.innerHTML = "null";
+        }
         disp_flag.innerHTML = `${annot_flag}`;
     }
 }
