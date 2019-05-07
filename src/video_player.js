@@ -1,4 +1,5 @@
 // all functions used by the video_player
+
 var play_selected_file = function (event) {
     var file = this.files[0];
     var type = file.type;
