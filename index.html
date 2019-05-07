@@ -25,6 +25,7 @@
 CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
 <div id="vid-input-div" style="display: none;">Video: <input type="file" accept="video/*" id="vid-input" style="width:200px;"/></div>
 <input value="Export Annotations" type="button" id="export" style="display: none;">
+<button id="demo">Load Demo</button>
 <br>
 <br>
 
@@ -324,7 +325,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
       eye_state: null_array,
       flag: null_array,
     },['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'flag']);
-    
+
     jump(0);
     update_current_state();
     resize_canvas(vid);
@@ -394,6 +395,15 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     var data = annotations.toCSV(true);
     export_csv("annotations.csv",data);
   });
+
+  $("#demo").click(function(e){
+    vid.src = '/videos/aishni_sample.mp4';
+
+    DataFrame.fromCSV('/videos/aishni_sample.csv').then(df => {
+      var ret = DataFrame.sql.registerTable(df, 'tmp', true);
+    });
+  });
+
 </script>
 
 </body>
