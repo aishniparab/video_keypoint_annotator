@@ -124,8 +124,8 @@ function display_annotations(cf){
         var annot_eye_state = row.get('eye_state');
         var annot_flag = row.get('flag');
         draw_point(annot_outer_x,annot_outer_y, "#2FA5FF");
-        draw_point(annot_pupil_x, annot_pupil_y, "#C0FF96");
-        draw_point(annot_inner_x, annot_inner_y, "#FF3521");
+        draw_point(annot_pupil_x, annot_pupil_y, "#FF3521");
+        draw_point(annot_inner_x, annot_inner_y, "#C0FF96");
 
         // update display table
         disp_frame_num.innerHTML = current_frame();

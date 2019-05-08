@@ -366,7 +366,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
         kp_selection = "pupil";
         kp_pupil_selection_count = 1;
         kp_prev_pupil_pos = [click_pos_x, click_pos_y];
-        draw_point(click_pos_x, click_pos_y, "#C0FF96");
+        draw_point(click_pos_x, click_pos_y, "#FF3521");
         annotations = annotations.setRow(current_frame(), row => row.set("pupil_x", click_pos_x));
         annotations = annotations.setRow(current_frame(), row => row.set("pupil_y", click_pos_y));
         disp_rp.innerHTML = `${click_pos_x}, ${click_pos_y}`; // update table display
@@ -382,7 +382,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
         kp_selection = "inner";
         kp_inner_selection_count = 1;
         kp_prev_inner_pos = [click_pos_x, click_pos_y];
-        draw_point(click_pos_x, click_pos_y, "#FF3521");
+        draw_point(click_pos_x, click_pos_y, "#C0FF96");
         annotations = annotations.setRow(current_frame(), row => row.set("inner_x", click_pos_x));
         annotations = annotations.setRow(current_frame(), row => row.set("inner_y", click_pos_y));
         disp_ri.innerHTML = `${click_pos_x}, ${click_pos_y}`; // update table display
