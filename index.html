@@ -202,6 +202,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   // key point vars for display
   var kp_selection = null;
   var click_count = 0;
+  var current_click_pos = null;
   var kp_inner_selection_count = null;
   var kp_outer_selection_count = null;
   var kp_pupil_selection_count = null;
@@ -290,6 +291,78 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     disp_flag.innerHTML = "null";
     document.getElementById("annot-eye-state-box").style.borderColor = "black";
   });
+  Mousetrap.bind('shift+up', function(e){
+    //sub delta to kp_y
+    var current_x = current_click_pos[0];
+    var current_y = current_click_pos[1];
+    var new_y = current_y - 1;
+    current_click_pos = [current_x, new_y]
+    clear_point(current_x, current_y);
+    draw_point(current_x, new_y);
+    if (kp_selection == 'outer'){
+      kp_prev_outer_pos = current_click_pos;
+    }
+    if (kp_selection == 'pupil'){
+      kp_prev_pupil_pos = current_click_pos;
+    }
+    if (kp_selection == 'inner'){
+      kp_prev_inner_pos = current_click_pos;
+    }
+  });
+  Mousetrap.bind('shift+down', function(e){
+    //add delta to kp_y
+    var current_x = current_click_pos[0];
+    var current_y = current_click_pos[1];
+    var new_y = current_y + 1;
+    current_click_pos = [current_x, new_y]
+    clear_point(current_x, current_y);
+    draw_point(current_x, new_y);
+    if (kp_selection == 'outer'){
+      kp_prev_outer_pos = current_click_pos;
+    }
+    if (kp_selection == 'pupil'){
+      kp_prev_pupil_pos = current_click_pos;
+    }
+    if (kp_selection == 'inner'){
+      kp_prev_inner_pos = current_click_pos;
+    }
+  });
+  Mousetrap.bind('shift+left', function(e){
+    //sub delta to kp_x
+    var current_x = current_click_pos[0];
+    var current_y = current_click_pos[1];
+    var new_x = current_x - 1;
+    current_click_pos = [new_x, current_y]
+    clear_point(current_x, current_y);
+    draw_point(new_x, current_y);
+    if (kp_selection == 'outer'){
+      kp_prev_outer_pos = current_click_pos;
+    }
+    if (kp_selection == 'pupil'){
+      kp_prev_pupil_pos = current_click_pos;
+    }
+    if (kp_selection == 'inner'){
+      kp_prev_inner_pos = current_click_pos;
+    }
+  });
+  Mousetrap.bind('shift+right', function(e){
+    //add delta to kp_x
+    var current_x = current_click_pos[0];
+    var current_y = current_click_pos[1];
+    var new_x = current_x + 1;
+    current_click_pos = [new_x, current_y]
+    clear_point(current_x, current_y);
+    draw_point(new_x, current_y);
+    if (kp_selection == 'outer'){
+      kp_prev_outer_pos = current_click_pos;
+    }
+    if (kp_selection == 'pupil'){
+      kp_prev_pupil_pos = current_click_pos;
+    }
+    if (kp_selection == 'inner'){
+      kp_prev_inner_pos = current_click_pos;
+    }
+  });
 
 
   vid.ontimeupdate = function () {
@@ -337,6 +410,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   // draw key point
   $("#mycanvas").click(function(e){
     var click_pos = get_click_position(e);
+    current_click_pos = click_pos;
     var click_pos_x = click_pos[0];
     var click_pos_y = click_pos[1];
 
