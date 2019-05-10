@@ -58,6 +58,37 @@ tr:nth-child(odd) {
   position: absolute;
   z-index: 5;
 }
+#focus_box{
+  border: 1px solid white;
+  position: absolute;
+  z-index: 5;
+}
+#machine_status{
+  position: absolute;
+  z-index: 5;
+  color: white;
+}
+#machine_eye_state{
+  position: absolute;
+  z-index: 5;
+  color: black;
+}
+#blink_status{
+  position: absolute;
+  z-index: 5;
+  color: darkorange;
+  visibility: hidden;
+}
+#annotator_status{
+  position: absolute;
+  z-index: 5;
+  color: white;
+}
+#annotator_eye_state{
+  position: absolute;
+  z-index: 5;
+  color: black;
+}
 div.key
 {
   width:55px;

@@ -18,6 +18,13 @@
   <div id="right_inner"></div>
   <div id="right_pupil"></div>
   <div id="right_outer"></div>
+  <div id="focus_box"></div>
+  <div id="machine_status">Machine:</div>
+  <div id="machine_eye_state"></div>
+  <div id="annotator_status">Annotator:</div>
+  <div id="annotator_eye_state"></div>
+  <div id="blink_status">blink</div>
+
 </div>
 
 <!-- buttons -->
@@ -42,22 +49,6 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
 </div>
 <div id="cmd-status-div" class="col-4" style="font-size:10px; display: None;">Command: <span id="cmd-status"> </span></div>
 
-<!-- eye state -->
-<div style="width: 500px position: relative; margin-bottom: 240px; margin-top: 50px">
-  <div style="float: left; position: absolute;">
-    Model Prediction:
-    <div id="model-eye-state-box" style="border: 5px solid black; height: 100px; width: 100px; text-align: center; margin-left: 25px; margin-top: 5px;">
-      <div id="disp_model_eye_state" style="padding-top: 40px">null</div>
-    </div>
-  </div>
-  <div style="float: right; position: absolute; margin-left: 250px;">
-    Your Prediction:
-    <div id="annot-eye-state-box" style="border: 5px solid black; height: 100px; width: 100px; text-align: center; margin-left: 25px; margin-top: 5px;">
-      <div id="disp_eye_state" style="padding-top: 40px;">null</div>
-    </div>
-  </div>
-</div>
-
 <!-- annotation display -->
 <div>
   Your Annotations:
@@ -69,6 +60,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
       <td>Inner</td>
       <td>Eye State</td>
       <td>Flag</td>
+      <td>Blink</td>
     </tr>
     <tr>
       <td id="disp_frame_num">null</td>
@@ -77,6 +69,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
       <td id="disp_ri">null</td>
       <td id="eye_state">null</td>
       <td id="disp_flag">null</td>
+      <td id="disp_blink">null</td>
     </tr>
   </table>
 </div>
@@ -183,12 +176,18 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   var csvInput = document.querySelector('#csv-input');
   var vid_max = document.querySelector('#frame-ts-max');
   var frame_max = document.querySelector('#frame-id-max');
-  var disp_model_eye_state = document.querySelector('#disp_model_eye_state');
 
   // initialize keypoint variables for df
   const right_pupil_kp = document.querySelector('#right_pupil');
   const right_inner_kp = document.querySelector('#right_inner');
   const right_outer_kp = document.querySelector('#right_outer');
+  // focus box vars for display
+  const focus_box_el = document.querySelector('#focus_box');
+  const machine_status_el = document.querySelector('#machine_status');
+  const machine_eye_state_el = document.querySelector('#machine_eye_state');
+  const annotator_status_el = document.querySelector('#annotator_status');
+  const annotator_eye_state_el = document.querySelector('#annotator_eye_state');
+  const blink_status_el = document.querySelector('#blink_status');
 
   //const aspect_ratio = parseFloat(1920)/parseFloat(1080);
   var fps = 30;
@@ -197,7 +196,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
 
   // set up df
   var DataFrame = dfjs.DataFrame; // input csv
-  var annotations = new DataFrame([],['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'flag']);
+  var annotations = new DataFrame([],['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'is_bad']);
 
   // key point vars for display
   var kp_selection = null;
@@ -215,9 +214,11 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   var disp_ri = document.querySelector('#disp_ri');
   var disp_rp = document.querySelector('#disp_rp');
   var disp_ro = document.querySelector('#disp_ro');
-  var disp_eye_state = document.querySelector('#disp_eye_state');
   var disp_flag = document.querySelector('#disp_flag');
+  var disp_blink = document.querySelector('#disp_blink');
+  var disp_flag_status = 0;
   var eye_state = document.querySelector('#eye_state');
+  var blink_flag = null;
 
   // set key bindings
   Mousetrap.bind('c', function (e) {
@@ -236,9 +237,18 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   });
   Mousetrap.bind('w', function (e) {
     //flag annotation as bad
-
-    annotations = annotations.setRow(current_frame(), row => row.set("flag", 1));
-    disp_flag.innerHTML = "1"; // update table display
+     // update table display
+    if (disp_flag_status == 1){
+      disp_flag_status = 0;
+      disp_flag.innerHTML = "null";
+      annotations = annotations.setRow(current_frame(), row => row.set("is_bad", 1));
+    }
+    else if (disp_flag_status == 0){
+      disp_flag_status = 1;
+      disp_flag.innerHTML = "1";
+      annotations = annotations.setRow(current_frame(), row => row.set("is_bad", "null"));
+    }
+    annotations.show();
   });
   Mousetrap.bind('s', function (e){
     // select outer corner
@@ -258,17 +268,17 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   Mousetrap.bind('e', function (e){
     // set eye state to closed
     annotations = annotations.setRow(current_frame(), row => row.set("eye_state", 0));
-    disp_eye_state.innerHTML = "closed";
+
+    annotator_eye_state_el.innerHTML = "closed";
     eye_state.innerHTML = "closed";
-    document.getElementById("annot-eye-state-box").style.borderColor = "#C0FF96";
+    document.getElementById("annotator_eye_state").style.color = "#C0FF96";
   });
   Mousetrap.bind('r', function (e){
     // set eye state to open
     annotations = annotations.setRow(current_frame(), row => row.set("eye_state", 1));
-    disp_eye_state.innerHTML = "open";
     eye_state.innerHTML = "open";
-    document.getElementById("annot-eye-state-box").style.borderColor = "#2FA5FF";
-
+    annotator_eye_state_el.innerHTML = "open";
+    document.getElementById("annotator_eye_state").style.color = "#2FA5FF";
   });
   Mousetrap.bind('x', function(e) {
     // clear all annotations from display
@@ -281,15 +291,15 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     annotations = annotations.setRow(current_frame(), row => row.set("outer_x", null));
     annotations = annotations.setRow(current_frame(), row => row.set("outer_y", null));
     annotations = annotations.setRow(current_frame(), row => row.set("eye_state", null));
-    annotations = annotations.setRow(current_frame(), row => row.set("flag", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("is_bad", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("blink", null));
     // update display
     disp_frame_num.innerHTML = current_frame();
     disp_ro.innerHTML = "null, null";
     disp_rp.innerHTML = "null, null";
     disp_ri.innerHTML = "null, null";
-    disp_eye_state.innerHTML = "null";
+    annotator_eye_state_el.innerHTML = "null";
     disp_flag.innerHTML = "null";
-    document.getElementById("annot-eye-state-box").style.borderColor = "black";
   });
   Mousetrap.bind('shift+up', function(e){
     //sub delta to kp_y
@@ -363,6 +373,22 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
       kp_prev_inner_pos = current_click_pos;
     }
   });
+  Mousetrap.bind('b', function(e) {
+
+    if (blink_flag == 1){
+      blink_flag = 0;
+      blink_status_el.style.visibility = "hidden";
+      disp_blink.innerHTML = "null";
+      annotations = annotations.setRow(current_frame(), row => row.set("blink", "null"));
+    }
+    else{
+      blink_flag = 1;
+      blink_status_el.style.visibility = "visible";
+      disp_blink.innerHTML = "1";
+      annotations = annotations.setRow(current_frame(), row => row.set("blink", 1));
+    }
+    annotations.show();
+  });
 
 
   vid.ontimeupdate = function () {
@@ -396,8 +422,9 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
       outer_x: null_array,
       outer_y: null_array,
       eye_state: null_array,
-      flag: null_array,
-    },['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'flag']);
+      is_bad: null_array,
+      blink: null_array,
+    },['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'is_bad', 'blink']);
 
     jump(0);
     update_current_state();

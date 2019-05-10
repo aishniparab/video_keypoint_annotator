@@ -86,12 +86,36 @@ function display_model_predictions(cf) {
     right_inner_kp.style.top = right_inner_y - 2.5 + 'px';
     right_outer_kp.style.left = right_outer_x - 2.5 + 'px';
     right_outer_kp.style.top = right_outer_y - 2.5 + 'px';
+
+    var box_w = right_inner_x - 2.5 - right_outer_x - 2.5;
+
+    focus_box_el.style.top = right_pupil_y - box_w*1.5 + 'px';
+    focus_box_el.style.left = right_pupil_x - box_w*1.5 + 'px';
+    focus_box_el.style.width = box_w*3.5 + 'px';
+    focus_box_el.style.height = box_w*2.5 + 'px';
+
+    machine_status_el.style.top = right_pupil_y - box_w*1.5 - 40 + 'px';
+    machine_status_el.style.left = right_pupil_x - box_w*1.5 + 'px';
+
+    machine_eye_state_el.style.top = right_pupil_y - box_w*1.5 - 40 + 'px';
+    machine_eye_state_el.style.left = right_pupil_x - box_w*1.5 + 90+ 'px';
+
+    annotator_status_el.style.top = right_pupil_y - box_w*1.5 - 20 + 'px';
+    annotator_status_el.style.left = right_pupil_x - box_w*1.5 + 'px';
+
+    annotator_eye_state_el.style.top = right_pupil_y - box_w*1.5 - 20 + 'px';
+    annotator_eye_state_el.style.left = right_pupil_x - box_w*1.5 + 110+ 'px';
+
+    blink_status_el.style.top = right_pupil_y - box_w*1.5 - 20 + 'px';
+    blink_status_el.style.left = right_pupil_x + box_w + 15+ 'px';
+
     if (result_array[0][7] >= 0.5) {
-        disp_model_eye_state.innerHTML = "open";
-        document.getElementById("model-eye-state-box").style.borderColor = "#2FA5FF";
+        machine_eye_state_el.innerHTML = "open";
+        document.getElementById("machine_eye_state").style.color = "#2FA5FF";
+
     } else {
-        disp_model_eye_state.innerHTML = "closed";
-        document.getElementById("model-eye-state-box").style.borderColor = "#C0FF96";
+        machine_eye_state_el.innerHTML = "closed";
+        document.getElementById("machine_eye_state").style.color = "#C0FF96";
     }
 }
 
@@ -99,7 +123,7 @@ function display_annotations(cf){
     var exists_ret = check_if_annot_exists(current_frame());
     if (!exists_ret) {
         // push init annotation if it doesn't already exist
-        var init_annot = [current_frame(), null, null, null, null, null, null, null, null];
+        var init_annot = [current_frame(), null, null, null, null, null, null, null, null, null];
         annotations = annotations.push(init_annot);
 
         // update display
@@ -107,10 +131,11 @@ function display_annotations(cf){
         disp_ro.innerHTML = "null, null";
         disp_rp.innerHTML = "null, null";
         disp_ri.innerHTML = "null, null";
-        disp_eye_state.innerHTML = "null";
         eye_state.innerHTML = "null";
+        annotator_eye_state_el.innerHTML = "null";
+        machine_eye_state_el.innerHTML = "null";
         disp_flag.innerHTML = "null";
-        document.getElementById("annot-eye-state-box").style.borderColor = "black";
+        blink_status_el.style.visibility = "hidden";
     }
     else {
         // redraw points
@@ -122,7 +147,9 @@ function display_annotations(cf){
         var annot_inner_x = row.get('inner_x');
         var annot_inner_y = row.get('inner_y');
         var annot_eye_state = row.get('eye_state');
-        var annot_flag = row.get('flag');
+        var annot_flag = row.get('is_bad');
+        var blink_status = row.get('blink');
+        console.log(row);
         draw_point(annot_outer_x,annot_outer_y, "#2FA5FF");
         draw_point(annot_pupil_x, annot_pupil_y, "#FF3521");
         draw_point(annot_inner_x, annot_inner_y, "#C0FF96");
@@ -133,20 +160,41 @@ function display_annotations(cf){
         disp_rp.innerHTML = `${annot_pupil_x}, ${annot_pupil_y}`;
         disp_ri.innerHTML = `${annot_inner_x}, ${annot_inner_y}`;
         if (annot_eye_state === 1) {
-            disp_eye_state.innerHTML = "open";
             eye_state.innerHTML = "open";
-            document.getElementById("annot-eye-state-box").style.borderColor = "#2FA5FF";
+            annotator_eye_state_el.innerHTML = "open";
+            document.getElementById("annotator_eye_state").style.color = "#2FA5FF";
+
         }
         else if (annot_eye_state === 0) {
-            disp_eye_state.innerHTML = "closed";
             eye_state.innerHTML = "closed";
-            document.getElementById("annot-eye-state-box").style.borderColor = "#C0FF96";
+            annotator_eye_state_el.innerHTML = "closed";
+            document.getElementById("annotator_eye_state").style.color = "#C0FF96";
         }
         else {
-            disp_eye_state.innerHTML = "null";
             eye_state.innerHTML = "null";
-            document.getElementById("annot-eye-state-box").style.borderColor = "black";
+            annotator_eye_state_el.innerHTML = "null";
+            document.getElementById("annotator_eye_state").style.color = "black";
         }
         disp_flag.innerHTML = `${annot_flag}`;
+
+        if (blink_status == 1){
+            blink_status_el.style.visibility = "visible";
+        }
+        else{
+            blink_status_el.style.visibility = "hidden";
+        }
+    }
+}
+
+function toggleBlinkStatus(){
+    if (blink_flag == 1){
+        blink_flag = 0;
+        blink_status_el.style.visibility = "hidden";
+        annotations = annotations.setRow(current_frame(), row => row.set("is_bad", 0));
+    }
+    else if (blink_flag == 0){
+        blink_flag = 1;
+        blink_status_el.style.visibility = "visible";
+        annotations = annotations.setRow(current_frame(), row => row.set("is_bad", 1));
     }
 }
