@@ -163,7 +163,6 @@ function display_annotations(cf){
             eye_state.innerHTML = "open";
             annotator_eye_state_el.innerHTML = "open";
             document.getElementById("annotator_eye_state").style.color = "#2FA5FF";
-
         }
         else if (annot_eye_state === 0) {
             eye_state.innerHTML = "closed";
@@ -175,13 +174,23 @@ function display_annotations(cf){
             annotator_eye_state_el.innerHTML = "null";
             document.getElementById("annotator_eye_state").style.color = "black";
         }
-        disp_flag.innerHTML = `${annot_flag}`;
-
-        if (blink_status == 1){
-            blink_status_el.style.visibility = "visible";
+        if (annot_flag == 1){
+            disp_flag_status = 1;
+            disp_flag.innerHTML = `${annot_flag}`;
         }
         else{
+            disp_flag_status = 0;
+            disp_flag.innerHTML = `${annot_flag}`;
+        }
+        if (blink_status == 1){
+            blink_flag = 1;
+            blink_status_el.style.visibility = "visible";
+            disp_blink.innerHTML = `${blink_status}`;
+        }
+        else{
+            blink_flag = 0;
             blink_status_el.style.visibility = "hidden";
+            disp_blink.innerHTML = `${blink_status}`;
         }
     }
 }
