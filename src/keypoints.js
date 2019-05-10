@@ -10,47 +10,22 @@ var load_csv = function(event) {
     document.getElementById("vid-input-div").style.display = "inline";
 };
 
-function export_csv(filename, text) {
-    var element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    element.setAttribute('download', filename);
-
-    element.style.display = 'none';
-    document.body.appendChild(element);
-
-    element.click();
-
-    document.body.removeChild(element);
-}
-
-function resize_canvas(element) {
-    var w = element.offsetWidth;
-    var h = element.offsetHeight;
-    var cv = document.getElementById("mycanvas");
-    cv.width = w;
-    cv.height = h;
-}
-
-function get_click_position(event){
-    var rect = mycanvas.getBoundingClientRect();
-    var x = event.clientX - rect.left;
-    var y = event.clientY - rect.top;
-    return [x, y];
-}
-
-function draw_point(x,y, color){
-    var ctx = document.getElementById("mycanvas").getContext("2d");
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, 3, 0, Math.PI * 2, true);
-    ctx.fill();
-}
-
-function clear_point(x, y){
-    var ctx = document.getElementById("mycanvas").getContext("2d");
-    ctx.beginPath();
-    ctx.clearRect(x-3-1, y - 3-1, 3*2+2, 3 * 2 + 2);
-    ctx.closePath();
+function init_annot_array(){
+    // initialize
+    const frame_num_array = [...Array(frame_count()).keys()];
+    const null_array = new Array(frame_count()).fill(null);
+    annotations = new DataFrame({
+        frame_num: frame_num_array,
+        pupil_x: null_array,
+        pupil_y: null_array,
+        inner_x: null_array,
+        inner_y: null_array,
+        outer_x: null_array,
+        outer_y: null_array,
+        eye_state: null_array,
+        is_bad: null_array,
+        blink: null_array,
+    },['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'is_bad', 'blink']);
 }
 
 function check_if_annot_exists(frame_num){
@@ -63,9 +38,32 @@ function check_if_annot_exists(frame_num){
     }
 }
 
-function clear_all_points(){
-    var ctx = document.getElementById("mycanvas").getContext("2d");
-    ctx.clearRect(0, 0, mycanvas.width, mycanvas.height);
+function toggleBlinkStatus(){
+    if (blink_flag == 1){
+        blink_flag = 0;
+        blink_status_el.style.visibility = "hidden";
+        disp_blink.innerHTML = "null";
+        annotations = annotations.setRow(current_frame(), row => row.set("blink", "null"));
+    }
+    else{
+        blink_flag = 1;
+        blink_status_el.style.visibility = "visible";
+        disp_blink.innerHTML = "1";
+        annotations = annotations.setRow(current_frame(), row => row.set("blink", 1));
+    }
+}
+
+function toggle_is_bad(){
+    if (disp_flag_status == 1){
+        disp_flag_status = 0;
+        disp_flag.innerHTML = "null";
+        annotations = annotations.setRow(current_frame(), row => row.set("is_bad", "null"));
+    }
+    else{
+        disp_flag_status = 1;
+        disp_flag.innerHTML = "1";
+        annotations = annotations.setRow(current_frame(), row => row.set("is_bad", 1));
+    }
 }
 
 function display_model_predictions(cf) {
@@ -118,6 +116,40 @@ function display_model_predictions(cf) {
         document.getElementById("machine_eye_state").style.color = "#C0FF96";
     }
 }
+function resize_canvas(element) {
+    var w = element.offsetWidth;
+    var h = element.offsetHeight;
+    var cv = document.getElementById("mycanvas");
+    cv.width = w;
+    cv.height = h;
+}
+
+function get_click_position(event){
+    var rect = mycanvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+    return [x, y];
+}
+
+function draw_point(x,y, color){
+    var ctx = document.getElementById("mycanvas").getContext("2d");
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2, true);
+    ctx.fill();
+}
+
+function clear_point(x, y){
+    var ctx = document.getElementById("mycanvas").getContext("2d");
+    ctx.beginPath();
+    ctx.clearRect(x-3-1, y - 3-1, 3*2+2, 3 * 2 + 2);
+    ctx.closePath();
+}
+
+function clear_all_points(){
+    var ctx = document.getElementById("mycanvas").getContext("2d");
+    ctx.clearRect(0, 0, mycanvas.width, mycanvas.height);
+}
 
 function display_annotations(cf){
     var exists_ret = check_if_annot_exists(current_frame());
@@ -149,7 +181,6 @@ function display_annotations(cf){
         var annot_eye_state = row.get('eye_state');
         var annot_flag = row.get('is_bad');
         var blink_status = row.get('blink');
-        console.log(row);
         draw_point(annot_outer_x,annot_outer_y, "#2FA5FF");
         draw_point(annot_pupil_x, annot_pupil_y, "#FF3521");
         draw_point(annot_inner_x, annot_inner_y, "#C0FF96");
@@ -195,15 +226,131 @@ function display_annotations(cf){
     }
 }
 
-function toggleBlinkStatus(){
-    if (blink_flag == 1){
-        blink_flag = 0;
-        blink_status_el.style.visibility = "hidden";
-        annotations = annotations.setRow(current_frame(), row => row.set("is_bad", 0));
+function clear_annotations(){
+    annotations = annotations.setRow(current_frame(), row => row.set("pupil_x", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("pupil_y", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("inner_x", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("inner_y", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("outer_x", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("outer_y", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("eye_state", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("is_bad", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("blink", null));
+}
+
+function clear_display(){
+    disp_frame_num.innerHTML = current_frame();
+    disp_ro.innerHTML = "null, null";
+    disp_rp.innerHTML = "null, null";
+    disp_ri.innerHTML = "null, null";
+    annotator_eye_state_el.innerHTML = "null";
+    eye_state.innerHTML = "null";
+    disp_flag.innerHTML = "null";
+    disp_blink.innerHTML = "null";
+    blink_status_el.style.visibility = "hidden";
+}
+
+function move_kp(current_pos, direction, kp, pos){
+    var current_x = pos[0];
+    var current_y = pos[1];
+    if (direction == "up"){
+        //sub delta to kp_y
+        var new_x = current_x;
+        var new_y = current_y - 1;
     }
-    else if (blink_flag == 0){
-        blink_flag = 1;
-        blink_status_el.style.visibility = "visible";
-        annotations = annotations.setRow(current_frame(), row => row.set("is_bad", 1));
+    if (direction == "down"){
+        //add delta to kp_y
+        var new_x = current_x;
+        var new_y = current_y + 1;
     }
+    if (direction=="left"){
+        //sub delta to kp_x
+        var new_x = current_x - 1;
+        var new_y = current_y;
+    }
+    if (direction == "right"){
+        //add delta to kp_x
+        var new_x = current_x + 1;
+        var new_y = current_y;
+    }
+    current_click_pos = [new_x, new_y]
+    clear_point(current_x, current_y);
+    draw_point(new_x, new_y);
+
+    if (kp == 'outer'){
+        var kp_prev_outer_pos = pos;
+        disp_ro.innerHTML = `${new_x}, ${new_y}`;
+    }
+    if (kp == 'pupil'){
+        var kp_prev_pupil_pos = pos;
+        disp_rp.innerHTML = `${new_x}, ${new_y}`;
+    }
+    if (kp == 'inner'){
+        var kp_prev_inner_pos = pos;
+        disp_ri.innerHTML = `${new_x}, ${new_y}`;
+    }
+    annotations = annotations.setRow(current_frame(), row => row.set(kp+'_x', new_x));
+    annotations = annotations.setRow(current_frame(), row => row.set(kp+'_y', new_y));
+}
+
+function draw_kp(click_pos, kp){
+    console.log("in here");
+    current_click_pos = click_pos;
+    if (kp == 'outer'){
+        if (click_count == 0){
+            click_count = 1;
+            if (kp_outer_selection_count == 1) {
+                clear_point(kp_prev_outer_pos[0], kp_prev_outer_pos[1]);
+                kp_outer_selection_count = 0
+            }
+            kp_selection = "outer";
+            kp_outer_selection_count = 1;
+            kp_prev_outer_pos = [click_pos[0], click_pos[1]];
+            disp_ro.innerHTML = `${click_pos[0]}, ${click_pos[1]}`; // update table display
+            draw_point(click_pos[0], click_pos[1], "#2FA5FF");
+        }
+    }
+    if (kp == 'pupil'){
+        if (click_count == 0){
+            click_count = 1;
+            if (kp_pupil_selection_count == 1){
+                clear_point(kp_prev_pupil_pos[0], kp_prev_pupil_pos[1]);
+                kp_pupil_selection_count = 0;
+            }
+            kp_selection = kp;
+            kp_pupil_selection_count = 1;
+            kp_prev_pupil_pos = [click_pos[0], click_pos[1]];
+            disp_rp.innerHTML = `${click_pos[0]}, ${click_pos[1]}`; // update table display
+            draw_point(click_pos[0], click_pos[1], "#FF3521");
+        }
+    }
+    if (kp == 'inner'){
+        if (click_count == 0){
+            click_count = 1;
+            if (kp_inner_selection_count == 1){
+                clear_point(kp_prev_inner_pos[0], kp_prev_inner_pos[1]);
+                kp_inner_selection_count = 0;
+            }
+            kp_selection = kp;
+            kp_inner_selection_count = 1;
+            kp_prev_inner_pos = [click_pos[0], click_pos[1]];
+            disp_ri.innerHTML = `${click_pos[0]}, ${click_pos[1]}`; // update table display
+            draw_point(click_pos[0], click_pos[1], "#C0FF96");
+        }
+    }
+    annotations = annotations.setRow(current_frame(), row => row.set(kp+"_x", click_pos[0]));
+    annotations = annotations.setRow(current_frame(), row => row.set(kp+"_y", click_pos[1]));
+}
+
+function export_csv(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
 }
