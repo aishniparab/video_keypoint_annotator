@@ -79,6 +79,17 @@ tr:nth-child(odd) {
   color: darkorange;
   visibility: hidden;
 }
+#looking_down_status{
+  position: absolute;
+  z-index: 5;
+  color: darkorange;
+  visibility: hidden;
+}
+#box_frame_num{
+  position: absolute;
+  z-index: 5;
+  color: white;
+}
 #annotator_status{
   position: absolute;
   z-index: 5;

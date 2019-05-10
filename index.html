@@ -24,7 +24,9 @@
   <div id="machine_eye_state"></div>
   <div id="annotator_status">Annotator:</div>
   <div id="annotator_eye_state"></div>
+  <div id="box_frame_num"></div>
   <div id="blink_status">blink</div>
+  <div id="looking_down_status">down</div>
 
 </div>
 
@@ -63,6 +65,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
       <td>Eye State</td>
       <td>Flag</td>
       <td>Blink</td>
+      <td>Looking Down</td>
     </tr>
     <tr>
       <td id="disp_frame_num">null</td>
@@ -72,6 +75,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
       <td id="eye_state">null</td>
       <td id="disp_flag">null</td>
       <td id="disp_blink">null</td>
+      <td id="disp_looking_down">null</td>
     </tr>
   </table>
 </div>
@@ -151,6 +155,20 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
         <span style="margin-left: 30px;">b</span>
       </div>
       <div class="label" style="margin-left: 75px;">blink</div>
+    </li>
+    <li>
+      <div class="key">
+        <span style="display: none;"></span>
+      </div>
+      <div></div>
+      <div class="key">
+        <span style="margin-left: 50px; margin-top: 45px;">g</span>
+      </div>
+      <div class="label" style="margin-left: 50px; margin-top: 55px;">looking down</div>
+      <div>
+        <span style="display: none;"></span>
+      </div>
+      <div class="label"></div>
     </li>
   </ul>
 </div>
@@ -232,6 +250,8 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   const annotator_status_el = document.querySelector('#annotator_status');
   const annotator_eye_state_el = document.querySelector('#annotator_eye_state');
   const blink_status_el = document.querySelector('#blink_status');
+  const box_frame_num_el = document.querySelector('#box_frame_num');
+  const looking_down_status_el = document.querySelector('#looking_down_status');
 
   // key point click vars for display
   var kp_selection = null;
@@ -251,9 +271,11 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   var disp_ro = document.querySelector('#disp_ro');
   var disp_flag = document.querySelector('#disp_flag');
   var disp_blink = document.querySelector('#disp_blink');
+  var disp_looking_down = document.querySelector('#disp_looking_down');
   var disp_flag_status = 0;
   var eye_state = document.querySelector('#eye_state');
   var blink_flag = null;
+  var looking_down_flag = null;
 
   // set key bindings
   Mousetrap.bind('c', function (e) {
@@ -325,6 +347,10 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   Mousetrap.bind('b', function(e) {
     // set or unset blink
     toggleBlinkStatus();
+  });
+  Mousetrap.bind('g', function(e) {
+    // set or unset blink
+    toggleLookingDownStatus();
   });
 
   // triggered every frame step

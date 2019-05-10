@@ -25,7 +25,8 @@ function init_annot_array(){
         eye_state: null_array,
         is_bad: null_array,
         blink: null_array,
-    },['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'is_bad', 'blink']);
+        down: null_array,
+    },['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'is_bad', 'blink', 'down']);
 }
 
 function check_if_annot_exists(frame_num){
@@ -35,6 +36,21 @@ function check_if_annot_exists(frame_num){
     }
     else{
         return ret_df;
+    }
+}
+
+function toggleLookingDownStatus() {
+    if (looking_down_flag == 1){
+        looking_down_flag = 0;
+        disp_looking_down.innerHTML = "null";
+        looking_down_status_el.style.visibility = "hidden";
+        annotations = annotations.setRow(current_frame(), row => row.set("down", "null"));
+    }
+    else{
+        looking_down_flag = 1;
+        disp_looking_down.innerHTML = "1";
+        looking_down_status_el.style.visibility = "visible";
+        annotations = annotations.setRow(current_frame(), row => row.set("down", 1));
     }
 }
 
@@ -107,6 +123,13 @@ function display_model_predictions(cf) {
     blink_status_el.style.top = right_pupil_y - box_w*1.5 - 20 + 'px';
     blink_status_el.style.left = right_pupil_x + box_w + 15+ 'px';
 
+    looking_down_status_el.style.top = right_pupil_y - box_w*1.5 + 5 + 'px';
+    looking_down_status_el.style.left = right_pupil_x + box_w + 15+ 'px';
+
+    box_frame_num_el.innerHTML = current_frame();
+    box_frame_num_el.style.top = right_pupil_y - box_w*1.5 - 40 + 'px';
+    box_frame_num_el.style.left = right_pupil_x + box_w + 50+ 'px';
+
     if (result_array[0][7] >= 0.5) {
         machine_eye_state_el.innerHTML = "open";
         document.getElementById("machine_eye_state").style.color = "#2FA5FF";
@@ -155,7 +178,7 @@ function display_annotations(cf){
     var exists_ret = check_if_annot_exists(current_frame());
     if (!exists_ret) {
         // push init annotation if it doesn't already exist
-        var init_annot = [current_frame(), null, null, null, null, null, null, null, null, null];
+        var init_annot = [current_frame(), null, null, null, null, null, null, null, null, null, null];
         annotations = annotations.push(init_annot);
 
         // update display
@@ -168,6 +191,7 @@ function display_annotations(cf){
         machine_eye_state_el.innerHTML = "null";
         disp_flag.innerHTML = "null";
         blink_status_el.style.visibility = "hidden";
+        looking_down_status_el.style.visibility = "hidden";
     }
     else {
         // redraw points
@@ -181,6 +205,7 @@ function display_annotations(cf){
         var annot_eye_state = row.get('eye_state');
         var annot_flag = row.get('is_bad');
         var blink_status = row.get('blink');
+        var looking_down_status = row.get('down');
         draw_point(annot_outer_x,annot_outer_y, "#2FA5FF");
         draw_point(annot_pupil_x, annot_pupil_y, "#FF3521");
         draw_point(annot_inner_x, annot_inner_y, "#C0FF96");
@@ -223,6 +248,16 @@ function display_annotations(cf){
             blink_status_el.style.visibility = "hidden";
             disp_blink.innerHTML = `${blink_status}`;
         }
+        if (looking_down_status == 1){
+            looking_down_flag = 1;
+            looking_down_status_el.style.visibility = "visible";
+            disp_looking_down.inerHTML = `${looking_down_status}`;
+        }
+        else{
+            looking_down_flag = 0;
+            looking_down_status_el.style.visibility = "hidden";
+            disp_looking_down.inerHTML = `${looking_down_status}`;
+        }
     }
 }
 
@@ -236,6 +271,7 @@ function clear_annotations(){
     annotations = annotations.setRow(current_frame(), row => row.set("eye_state", null));
     annotations = annotations.setRow(current_frame(), row => row.set("is_bad", null));
     annotations = annotations.setRow(current_frame(), row => row.set("blink", null));
+    annotations = annotations.setRow(current_frame(), row => row.set("down", null));
 }
 
 function clear_display(){
@@ -247,7 +283,9 @@ function clear_display(){
     eye_state.innerHTML = "null";
     disp_flag.innerHTML = "null";
     disp_blink.innerHTML = "null";
+    disp_looking_down.innerHTML = "null";
     blink_status_el.style.visibility = "hidden";
+    looking_down_status_el.style.visibility = "hidden";
 }
 
 function move_kp(current_pos, direction, kp, pos){
@@ -294,7 +332,6 @@ function move_kp(current_pos, direction, kp, pos){
 }
 
 function draw_kp(click_pos, kp){
-    console.log("in here");
     current_click_pos = click_pos;
     if (kp == 'outer'){
         if (click_count == 0){
