@@ -83,7 +83,7 @@ function toggle_is_bad(){
 }
 
 function display_model_predictions(cf) {
-    var result = DataFrame.sql.request(`SELECT frame_num, pupil_x, pupil_y, inner_x, inner_y, outer_x, outer_y, eye_state FROM tmp WHERE frame_num < ${cf + 1} AND frame_num >= ${cf} AND if_right_eye = True`);
+    var result = DataFrame.sql.request(`SELECT frame_num, pupil_x, pupil_y, inner_x, inner_y, outer_x, outer_y, eye_state, if_right_eye FROM tmp WHERE frame_num < ${cf + 1} AND frame_num >= ${cf}`);
     var result_array = result.toArray();
 
     var right_pupil_x = parseFloat(result_array[0][1]); ///parseFloat(aspect_ratio);

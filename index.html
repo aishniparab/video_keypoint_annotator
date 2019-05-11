@@ -371,7 +371,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
   vid.onloadeddata = function () {
     // assert # frames in csv and video match
     var df_count = DataFrame.sql.request(`SELECT COUNT(*) FROM tmp`);
-    console.assert(df_count/2 == frame_count());
+    //console.assert(df_count/2 == frame_count());
 
     init_annot_array();
     jump(0);
