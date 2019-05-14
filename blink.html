@@ -6,7 +6,6 @@
     <title>Pupil Annotator</title>
 
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="keyboard.css">
 
 </head>
 
@@ -15,23 +14,18 @@
 <div style="position: relative;">
     <video id="video"></video>
 
-    <div id="focus_box"></div>
-    <div id="machine_status">Machine:</div>
-    <div id="machine_eye_state"></div>
-    <div id="annotator_status">Annotator:</div>
-    <div id="annotator_eye_state"></div>
     <div id="box_frame_num"></div>
-    <div id="blink_status">blink</div>
-    <div id="looking_down_status">down</div>
+    <div id="blink_start_status">blink start</div>
+    <div id="blink_end_status">blink end</div>
+    <div id="looking_down_start_status">down start</div>
+    <div id="looking_down_end_status">down end</div>
 
 </div>
 
 <!-- buttons below video-->
 <br>
-CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
-<div id="vid-input-div" style="display: none;">Video: <input type="file" accept="video/*" id="vid-input" style="width:200px;"/></div>
+Video: <input type="file" accept="video/*" id="vid-input" style="width:200px;"/>
 <input value="Export Annotations" type="button" id="export" style="display: none;">
-<!--<button id="demo">Load Demo</button>-->
 <br>
 <br>
 
@@ -45,34 +39,43 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     <span id="frame-ts">0</span>
     <span class="info-max">(max: </span>
     <span id="frame-ts-max">0</span><span class="info-max">)</span>
+    <span id="speed-label" style="margin-left: 30px">Speed:</span>
+    <span><input type="number" step="0.1" value="1" id="playback-speed" style="width: 50px" onchange="set_playback_speed()"></span>
 </div>
+
 <div id="cmd-status-div" class="col-4" style="font-size:10px; display: None;">Command: <span id="cmd-status"> </span></div>
 <br>
 <br>
-<!-- annotation display -->
+
+<!-- annotation table display -->
 <div>
     Your Annotations:
     <table>
         <tr>
             <td>Frame</td>
-            <td>Blink</td>
-            <td>Looking Down</td>
+            <td>Blink Start</td>
+            <td>Blink End</td>
+            <td>Looking Down Start</td>
+            <td>Looking Down End</td>
             <td>Flag</td>
         </tr>
         <tr>
             <td id="disp_frame_num">null</td>
-            <td id="disp_blink">null</td>
-            <td id="disp_looking_down">null</td>
+            <td id="disp_blink_start">null</td>
+            <td id="disp_blink_end">null</td>
+            <td id="disp_looking_down_start">null</td>
+            <td id="disp_looking_down_end">null</td>
             <td id="disp_flag">null</td>
         </tr>
     </table>
 </div>
+
 <br>
 <br>
 <br>
+
 <!-- usage instructions -->
 <b>Video Player Keyboard Shortcuts</b>
-<!-- key sizing :- https://codepen.io/coreybruyere/pen/VMVaqM pen by Corey Bruyere  -->
 
 <div id="shortcuts" style="font-size:12px;">
     <ul id="keys-freebie">
@@ -90,9 +93,9 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
             </div>
             <div class="label" style="margin-right: 40px;">restart</div>
             <div class="key">
-                <span style="width: 500px;">space</span>
+                <span style="width: 700px;">space</span>
             </div>
-            <div class="label" style="margin-right: 30px;">pause/play</div>
+            <div class="label">pause/play</div>
         </li>
         <li>
             <div class="key">
@@ -115,7 +118,7 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
             <div class="key">
                 <span>d</span>
             </div>
-            <div class="label" style="margin-right: 30px;">looking down</div>
+            <div class="label" style="margin-right: 30px;">looking down start</div>
             <div class="key">
                 <span>c</span>
             </div>
@@ -128,9 +131,9 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
             </div>
             <div class="label"></div>
             <div class="key">
-                <span style="display:none;"></span>
+                <span>f</span>
             </div>
-            <div class="label"></div>
+            <div class="label">looking down end</div>
             <div class="key">
                 <span>v</span>
             </div>
@@ -147,7 +150,20 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
             <div class="key">
                 <span style="margin-top: 47px;">b</span>
             </div>
-            <div class="label" style="margin-top: 57px;">blink</div>
+            <div class="label" style="margin-top: 57px;">blink start</div>
+        </li>
+        <li>
+            <div class="key">
+                <span style="display:none;"></span>
+            </div>
+            <div class="label"></div>
+            <div class="key">
+                <span style="display:none;"></span>
+            </div>
+            <div class="key">
+                <span style="margin-top: 47px;">n</span>
+            </div>
+            <div class="label" style="margin-top: 57px;">blink end</div>
         </li>
     </ul>
 </div>
@@ -160,8 +176,8 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
             <ol>
                 <li>Blink
                     <ul>
-                        <li>Mark the frame where a blink begins</li>
-                        <li>Mark the frame where a blink ends</li>
+                        <li>Mark the frame where a blink begins (first frame where eye is closed)</li>
+                        <li>Mark the frame where a blink ends (first frame after blink where eye is open)</li>
                     </ul>
                 </li>
                 <li>Looking Down
@@ -172,17 +188,16 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
                 </li>
             </ol>
         </li>
-
-
-
         <li>When finished with annotations, export your annoations and add "_yourname.csv" at the end of the file name</li>
     </ol>
 </div>
 
+<a href="index.html">Home</a>
+
 <!-- javascript source files -->
 <script src="src/video_player.js"></script>
 <script src="src/frame_drag.js"></script>
-<script src="src/keypoints.js"></script>
+<script src="src/blink.js"></script>
 
 <script src="omnizoom/dist/omnizoom.min.js"></script>
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
@@ -202,7 +217,6 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
 
     // input button elements
     var vidInput = document.querySelector('#vid-input');
-    var csvInput = document.querySelector('#csv-input');
 
     // set up df
     var DataFrame = dfjs.DataFrame; // input csv
@@ -219,11 +233,33 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     var divFrameId = document.querySelector('#frame-id');
     var divFrameTs = document.querySelector('#frame-ts');
     var divCmdStatus = document.querySelector('#cmd-status');
+    var vid_max = document.querySelector('#frame-ts-max');
+    var frame_max = document.querySelector('#frame-id-max');
 
-    var blink_flag = null;
-    var looking_down_flag = null;
+    // focus box elements
+    const box_frame_num_el = document.querySelector('#box_frame_num');
+    const blink_start_status_el = document.querySelector('#blink_start_status');
+    const blink_end_status_el = document.querySelector('#blink_end_status');
+    const looking_down_start_status_el = document.querySelector('#looking_down_start_status');
+    const looking_down_end_status_el = document.querySelector('#looking_down_end_status');
+
+    // display annotation table vars
+    var disp_frame_num = document.querySelector('#disp_frame_num');
+    var disp_flag = document.querySelector('#disp_flag');
+    var disp_blink_start = document.querySelector('#disp_blink_start');
+    var disp_blink_end = document.querySelector('#disp_blink_end');
+    var disp_looking_down_start = document.querySelector('#disp_looking_down_start');
+    var disp_looking_down_end = document.querySelector('#disp_looking_down_end');
+    var disp_flag_status = 0;
+    var blink_start_flag = null;
+    var blink_end_flag = null;
+    var looking_down_start_flag = null;
+    var looking_down_end_flag = null;
 
     // set key bindings
+    Mousetrap.bind('space', function (e) {
+        e.preventDefault();toggle_play();
+    });
     Mousetrap.bind('c', function (e) {
         // prev frame
         take_step(-1);
@@ -244,48 +280,51 @@ CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
     });
     Mousetrap.bind('x', function(e) {
         // clear
-        clear_all_points();
         clear_annotations();
         clear_display();
     });
     Mousetrap.bind('b', function(e) {
         // set or unset blink
-        toggleBlinkStatus();
+        toggleBlinkStartStatus();
     });
-    Mousetrap.bind('g', function(e) {
+    Mousetrap.bind('n', function(e) {
         // set or unset blink
-        toggleLookingDownStatus();
+        toggleBlinkEndStatus();
     });
-
+    Mousetrap.bind('d', function(e) {
+        // set or unset blink
+        toggleLookingStartDownStatus();
+    });
+    Mousetrap.bind('f', function(e) {
+        // set or unset blink
+        toggleLookingEndDownStatus();
+    });
     // triggered every frame step
     vid.ontimeupdate = function () {
         var cf = current_frame();
-        clear_all_points();
         if (cf >= 0) {
+            display_model_predictions(cf);
             display_annotations(cf);
         }
     };
 
-    csvInput.addEventListener('change', load_csv, false);
     vidInput.addEventListener('change', play_selected_file, false);
 
     // order of events once video is loaded
     vid.onloadeddata = function () {
-        // assert # frames in csv and video match
-        var df_count = DataFrame.sql.request(`SELECT COUNT(*) FROM tmp`);
-
         init_annot_array();
         jump(0);
         update_current_state();
-
+        frame_max.innerHTML = frame_count()-1;
+        vid_max.innerHTML = vid.duration;
         document.getElementById("export").style.display = "inline";
     }
+
     // export annotations
     $("#export").click(function(e){
         var data = annotations.toCSV(true);
         export_csv("annotations.csv",data);
     });
-
 
 </script>
 

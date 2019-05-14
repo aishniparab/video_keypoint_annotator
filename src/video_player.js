@@ -45,14 +45,14 @@ function current_frame() {
 }
 
 var fade_timer = null;
-function fadeCmd(cmdText) {
-    if (fadeTimer) clearInterval(fadeTimer);
+function fade_cmd(cmdText) {
+    if (fade_timer) clearInterval(fade_timer);
     var op = 1;
     divCmdStatus.style.display = 'inline';
     divCmdStatus.innerHTML = cmdText;
-    fadeTimer = setInterval(function () {
+    fade_timer = setInterval(function () {
         if (op <= 0.1) {
-            clearInterval(fadeTimer);
+            clearInterval(fade_timer);
             divCmdStatus.style.display = 'none';
         }
         divCmdStatus.style.opacity = op;
@@ -74,10 +74,16 @@ function toggle_play() {
     if (vid.paused) {
         fade_cmd('Play');
         vid.playbackRate = playbackSpeed;
+        //vid.playbackRate = 0.25;
         vid.play();
     } else {
         fade_cmd('Pause');
         vid.pause();
         jump(current_frame());
     }
+}
+
+function set_playback_speed() {
+    var x = document.getElementById("playback-speed").value;
+    playbackSpeed = x;
 }

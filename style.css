@@ -74,16 +74,28 @@ tr:nth-child(odd) {
   z-index: 5;
   color: black;
 }
-#blink_status{
+#blink_start_status{
   position: absolute;
   z-index: 5;
   color: darkorange;
   visibility: hidden;
 }
-#looking_down_status{
+#blink_end_status{
   position: absolute;
   z-index: 5;
   color: darkorange;
+  visibility: hidden;
+}
+#looking_down_start_status{
+  position: absolute;
+  z-index: 5;
+  color: chartreuse;
+  visibility: hidden;
+}
+#looking_down_end_status{
+  position: absolute;
+  z-index: 5;
+  color: chartreuse;
   visibility: hidden;
 }
 #box_frame_num{
