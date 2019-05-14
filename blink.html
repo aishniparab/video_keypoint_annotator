@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Pupil Annotator</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="keyboard.css">
+
+</head>
+
+<body>
+<!-- video and main display-->
+<div style="position: relative;">
+    <video id="video"></video>
+
+    <div id="focus_box"></div>
+    <div id="machine_status">Machine:</div>
+    <div id="machine_eye_state"></div>
+    <div id="annotator_status">Annotator:</div>
+    <div id="annotator_eye_state"></div>
+    <div id="box_frame_num"></div>
+    <div id="blink_status">blink</div>
+    <div id="looking_down_status">down</div>
+
+</div>
+
+<!-- buttons below video-->
+<br>
+CSV: <input type="file" accept=".csv" id="csv-input" style="width: 200px"/>
+<div id="vid-input-div" style="display: none;">Video: <input type="file" accept="video/*" id="vid-input" style="width:200px;"/></div>
+<input value="Export Annotations" type="button" id="export" style="display: none;">
+<!--<button id="demo">Load Demo</button>-->
+<br>
+<br>
+
+<!-- video state: frame and time info -->
+<div id='frame-div' class="col-8" style="font-size:18px;">
+    <span class="info-label">Frame:</span>
+    <span id="frame-id">0</span>
+    <span class="info-max">(max: </span>
+    <span id="frame-id-max">0</span><span class="info-max">)</span>
+    <span class="info-label" style="margin-left: 30px">Secs:</span>
+    <span id="frame-ts">0</span>
+    <span class="info-max">(max: </span>
+    <span id="frame-ts-max">0</span><span class="info-max">)</span>
+</div>
+<div id="cmd-status-div" class="col-4" style="font-size:10px; display: None;">Command: <span id="cmd-status"> </span></div>
+<br>
+<br>
+<!-- annotation display -->
+<div>
+    Your Annotations:
+    <table>
+        <tr>
+            <td>Frame</td>
+            <td>Blink</td>
+            <td>Looking Down</td>
+            <td>Flag</td>
+        </tr>
+        <tr>
+            <td id="disp_frame_num">null</td>
+            <td id="disp_blink">null</td>
+            <td id="disp_looking_down">null</td>
+            <td id="disp_flag">null</td>
+        </tr>
+    </table>
+</div>
+<br>
+<br>
+<br>
+<!-- usage instructions -->
+<b>Video Player Keyboard Shortcuts</b>
+<!-- key sizing :- https://codepen.io/coreybruyere/pen/VMVaqM pen by Corey Bruyere  -->
+
+<div id="shortcuts" style="font-size:12px;">
+    <ul id="keys-freebie">
+        <li>
+            <div class="key">
+                <span>w</span>
+            </div>
+            <div class="label">bad</div>
+            <div class="key">
+                <span style="display: none;"></span>
+            </div>
+            <div class="label" style="margin-right: 30px;"></div>
+            <div class="key">
+                <span>z</span>
+            </div>
+            <div class="label" style="margin-right: 40px;">restart</div>
+            <div class="key">
+                <span style="width: 500px;">space</span>
+            </div>
+            <div class="label" style="margin-right: 30px;">pause/play</div>
+        </li>
+        <li>
+            <div class="key">
+                <span style="display:none;"></span>
+            </div>
+            <div class="label"></div>
+            <div class="key">
+                <span style="display:none;"></span>
+            </div>
+            <div class="key">
+                <span style="margin-top: 47px;">x</span>
+            </div>
+            <div class="label" style="margin-right: 30px;  margin-top: 57px;">clear</div>
+        </li>
+        <li>
+            <div class="key">
+                <span style="display: none;"></span>
+            </div>
+            <div class="label"></div>
+            <div class="key">
+                <span>d</span>
+            </div>
+            <div class="label" style="margin-right: 30px;">looking down</div>
+            <div class="key">
+                <span>c</span>
+            </div>
+            <div class="label" style="margin-right: 40px;">prev</div>
+        </li>
+
+        <li>
+            <div class="key">
+                <span style="display:none;"></span>
+            </div>
+            <div class="label"></div>
+            <div class="key">
+                <span style="display:none;"></span>
+            </div>
+            <div class="label"></div>
+            <div class="key">
+                <span>v</span>
+            </div>
+            <div class="label" style="margin-right: 40px;">next</div>
+        </li>
+        <li>
+            <div class="key">
+                <span style="display:none;"></span>
+            </div>
+            <div class="label"></div>
+            <div class="key">
+                <span style="display:none;"></span>
+            </div>
+            <div class="key">
+                <span style="margin-top: 47px;">b</span>
+            </div>
+            <div class="label" style="margin-top: 57px;">blink</div>
+        </li>
+    </ul>
+</div>
+
+<div class="instructions" style="font-size:18px;">
+    <b>Instructions:</b>
+    <ol>
+        <li>Upload .csv file and corresponding .mp4 file</li>
+        <li>Watch the video carefully and make the following annotations
+            <ol>
+                <li>Blink
+                    <ul>
+                        <li>Mark the frame where a blink begins</li>
+                        <li>Mark the frame where a blink ends</li>
+                    </ul>
+                </li>
+                <li>Looking Down
+                    <ul>
+                        <li>Mark the frame where subject starts to look down</li>
+                        <li>Mark the frame where subject is done looking down</li>
+                    </ul>
+                </li>
+            </ol>
+        </li>
+
+
+
+        <li>When finished with annotations, export your annoations and add "_yourname.csv" at the end of the file name</li>
+    </ol>
+</div>
+
+<!-- javascript source files -->
+<script src="src/video_player.js"></script>
+<script src="src/frame_drag.js"></script>
+<script src="src/keypoints.js"></script>
+
+<script src="omnizoom/dist/omnizoom.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script type="text/javascript" src="src/mousetrap.min.js"></script>
+<script src="https://gmousse.github.io/dataframe-js/dist/dataframe.min.js"></script>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    // vid elements
+    var vid = document.getElementById('video');
+    var fps = 30;
+    var smallDelta = 0.001;
+    var playbackSpeed = 1;
+
+    // input button elements
+    var vidInput = document.querySelector('#vid-input');
+    var csvInput = document.querySelector('#csv-input');
+
+    // set up df
+    var DataFrame = dfjs.DataFrame; // input csv
+    var annotations = new DataFrame([],['frame_num', 'pupil_x', 'pupil_y', 'inner_x', 'inner_y', 'outer_x', 'outer_y', 'eye_state', 'is_bad']);
+
+    // initialize keypoint variables for df
+    const right_pupil_kp = document.querySelector('#right_pupil');
+    const right_inner_kp = document.querySelector('#right_inner');
+    const right_outer_kp = document.querySelector('#right_outer');
+
+    var createObjectURL = (window.URL || window.webkitURL).createObjectURL;
+
+    // frame time info elements
+    var divFrameId = document.querySelector('#frame-id');
+    var divFrameTs = document.querySelector('#frame-ts');
+    var divCmdStatus = document.querySelector('#cmd-status');
+
+    var blink_flag = null;
+    var looking_down_flag = null;
+
+    // set key bindings
+    Mousetrap.bind('c', function (e) {
+        // prev frame
+        take_step(-1);
+    }, 'keydown');
+    Mousetrap.bind('v', function (e) {
+        // next frame
+        take_step(1);
+
+    }, 'keydown');
+    Mousetrap.bind('z', function (e) {
+        // restart video
+        e.preventDefault();
+        jump(0);
+    });
+    Mousetrap.bind('w', function (e) {
+        //flag annotation as bad
+        toggle_is_bad();
+    });
+    Mousetrap.bind('x', function(e) {
+        // clear
+        clear_all_points();
+        clear_annotations();
+        clear_display();
+    });
+    Mousetrap.bind('b', function(e) {
+        // set or unset blink
+        toggleBlinkStatus();
+    });
+    Mousetrap.bind('g', function(e) {
+        // set or unset blink
+        toggleLookingDownStatus();
+    });
+
+    // triggered every frame step
+    vid.ontimeupdate = function () {
+        var cf = current_frame();
+        clear_all_points();
+        if (cf >= 0) {
+            display_annotations(cf);
+        }
+    };
+
+    csvInput.addEventListener('change', load_csv, false);
+    vidInput.addEventListener('change', play_selected_file, false);
+
+    // order of events once video is loaded
+    vid.onloadeddata = function () {
+        // assert # frames in csv and video match
+        var df_count = DataFrame.sql.request(`SELECT COUNT(*) FROM tmp`);
+
+        init_annot_array();
+        jump(0);
+        update_current_state();
+
+        document.getElementById("export").style.display = "inline";
+    }
+    // export annotations
+    $("#export").click(function(e){
+        var data = annotations.toCSV(true);
+        export_csv("annotations.csv",data);
+    });
+
+
+</script>
+
+</body>
+</html>
