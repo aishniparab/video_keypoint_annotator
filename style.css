@@ -74,6 +74,12 @@ tr:nth-child(odd) {
   z-index: 5;
   color: black;
 }
+#blink_status{
+  position: absolute;
+  z-index: 5;
+  color: darkorange;
+  visibility: hidden;
+}
 #blink_start_status{
   position: absolute;
   z-index: 5;
@@ -84,6 +90,12 @@ tr:nth-child(odd) {
   position: absolute;
   z-index: 5;
   color: darkorange;
+  visibility: hidden;
+}
+#looking_down_status{
+  position: absolute;
+  z-index: 5;
+  color: chartreuse;
   visibility: hidden;
 }
 #looking_down_start_status{

@@ -251,12 +251,12 @@ function display_annotations(cf){
         if (looking_down_status == 1){
             looking_down_flag = 1;
             looking_down_status_el.style.visibility = "visible";
-            disp_looking_down.inerHTML = `${looking_down_status}`;
+            disp_looking_down.innerHTML = `${looking_down_status}`;
         }
         else{
             looking_down_flag = 0;
             looking_down_status_el.style.visibility = "hidden";
-            disp_looking_down.inerHTML = `${looking_down_status}`;
+            disp_looking_down.innerHTML = `${looking_down_status}`;
         }
     }
 }
